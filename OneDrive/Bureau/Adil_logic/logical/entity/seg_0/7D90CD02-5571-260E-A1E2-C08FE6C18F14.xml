@@ -1,0 +1,87 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="7D90CD02-5571-260E-A1E2-C08FE6C18F14" name="Client">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:14:04 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="numéro national" id="9FABBB4C-E7F8-0FFA-CFE9-3024BB9E25EC">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:16:33 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="nom" id="65E06923-96A7-A2B6-03B5-C9A0688AF86B">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:16:38 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="adresse" id="62D855EC-5CEF-2A35-1C8C-C2C7AF6E0B45">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:16:48 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="num. téléphone" id="82856749-5912-6FA7-3C03-B935D39A4D14">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:16:55 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="date de vente" id="07908A9E-1FB5-CE39-7B9C-AE7AAFFF1A84">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:17:06 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="CE97692B-C8D9-2036-CFD8-B65A93B47199" name="Client PK">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:16:37 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>9FABBB4C-E7F8-0FFA-CFE9-3024BB9E25EC</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>

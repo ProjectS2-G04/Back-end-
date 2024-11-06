@@ -1,0 +1,19 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Relation class="oracle.dbtools.crest.model.design.logical.Relation" name="Vendre" directorySegmentName="seg_0" id="48F4711C-F3C2-2C50-CD4E-31D74562D921">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:17:40 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<sourcePk>CE97692B-C8D9-2036-CFD8-B65A93B47199</sourcePk>
+<identifying>false</identifying>
+<optionalSource>true</optionalSource>
+<optionalTarget>false</optionalTarget>
+<sourceCardinality>1</sourceCardinality>
+<sourceEntity>7D90CD02-5571-260E-A1E2-C08FE6C18F14</sourceEntity>
+<targetCardinalityString>*</targetCardinalityString>
+<targetEntity>7AE89C94-C36F-490C-630D-FE41F7B7D3F7</targetEntity>
+<transferable>true</transferable>
+<deleteRule>NO ACTION</deleteRule>
+</Relation>

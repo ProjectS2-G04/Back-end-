@@ -1,0 +1,133 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="7AE89C94-C36F-490C-630D-FE41F7B7D3F7" name="Product">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:13:42 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="product ID" id="772A6E04-C4F9-80E8-B4F9-64661F7499D6">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:14:17 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="couleur" id="9997D1D9-251A-B465-BA3A-416D1150AABD">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:14:25 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="gamme" id="99963D2F-928B-8C1D-9EFE-237DC0CA6B2C">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:14:44 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="matériaux de fabrication" id="C173734A-5142-7A0F-B237-3F49320F5529">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:14:54 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="date de fabrication" id="B632965B-440C-95D0-344D-B3503CB9FD94">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:15:06 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="pays de fabrication" id="A97C1847-E593-F9A4-C0F3-58BF4DBDBBA0">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:15:25 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="numéro de certification" id="2CA5FF40-EAC4-83D7-F56E-8DD475F7C749">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:15:37 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="numéro national" id="03489B72-98D4-090E-234E-FD078B0B3F03">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:17:40 UTC</createdTime>
+<generatorID>48F4711C-F3C2-2C50-CD4E-31D74562D921</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<referedAttribute>9FABBB4C-E7F8-0FFA-CFE9-3024BB9E25EC</referedAttribute>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="Depot ID" id="C120F4E9-77B8-647D-71C4-ED4803F43BCC">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:17:59 UTC</createdTime>
+<generatorID>B1DA467A-39CC-B330-45F6-79ADDCA10C04</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<referedAttribute>A584BC4D-E6BC-953D-8827-859953605665</referedAttribute>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="9BC15D91-34C6-4434-4CE4-FBAD1C0B8CDB" name="Product PK">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:14:23 UTC</createdTime>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<engineerTo>
+<item key="4B9505B2-F285-E458-8FA4-F6E11AF85651" value="true"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>772A6E04-C4F9-80E8-B4F9-64661F7499D6</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>
