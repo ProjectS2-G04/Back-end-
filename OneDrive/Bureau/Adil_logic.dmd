@@ -1,8 +1,0 @@
-<?xml version = '1.0' encoding = 'UTF-8'?>
-<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="Adil_logic" id="4AEFE272-120E-3F60-C05C-FFFB5B8BA528" version="3.5">
-<createdBy>DELL</createdBy>
-<createdTime>2024-11-06 17:13:18 UTC</createdTime>
-<ownerDesignName>Adil_logic</ownerDesignName>
-<capitalNames>false</capitalNames>
-<designId>4AEFE272-120E-3F60-C05C-FFFB5B8BA528</designId>
-</OSDM_Design>
