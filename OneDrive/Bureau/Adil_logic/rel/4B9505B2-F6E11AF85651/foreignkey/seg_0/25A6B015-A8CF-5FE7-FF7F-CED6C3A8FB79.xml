@@ -1,0 +1,17 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="25A6B015-A8CF-5FE7-FF7F-CED6C3A8FB79" containerWithKeyObject="ACE6E426-E515-C72C-48AF-3A82DA3FC5D9" localFKIndex="CD045F65-2033-DB66-908D-030DB1BCE8D9" name="Product_Depot_FK">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:21:05 UTC</createdTime>
+<generatorID>B1DA467A-39CC-B330-45F6-79ADDCA10C04</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<referredTableLongName>Depot</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>1FF8D6E0-EC39-A163-49A7-C00536A36BF8</referredTableID>
+<keyObject>DD9F771D-23FF-E313-0869-0670486D74B2</keyObject>
+<referredKeyID>DD9F771D-23FF-E313-0869-0670486D74B2</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>Depot_ID</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

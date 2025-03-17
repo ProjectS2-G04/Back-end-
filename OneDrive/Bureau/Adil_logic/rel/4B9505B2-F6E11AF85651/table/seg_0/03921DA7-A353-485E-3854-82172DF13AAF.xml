@@ -1,0 +1,75 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="03921DA7-A353-485E-3854-82172DF13AAF" name="Client">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:21:05 UTC</createdTime>
+<generatorID>7D90CD02-5571-260E-A1E2-C08FE6C18F14</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="numéro_national" id="802D22D4-9C52-A3DD-4C15-84A496645472">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:21:05 UTC</createdTime>
+<generatorID>9FABBB4C-E7F8-0FFA-CFE9-3024BB9E25EC</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="nom" id="CF16BF6E-BD46-3D1D-4EAE-1FC3ECEB846C">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:21:05 UTC</createdTime>
+<generatorID>65E06923-96A7-A2B6-03B5-C9A0688AF86B</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="adresse" id="A6831B6B-B1F2-8C41-A1D8-6EE09FDE2C1E">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:21:05 UTC</createdTime>
+<generatorID>62D855EC-5CEF-2A35-1C8C-C2C7AF6E0B45</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="num__téléphone" id="5E72A38F-06EF-3769-BE04-825C8EDCCBC2">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:21:05 UTC</createdTime>
+<generatorID>82856749-5912-6FA7-3C03-B935D39A4D14</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="date_de_vente" id="BE54CF36-2A04-14F3-840E-D94E41B7EE6C">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:21:05 UTC</createdTime>
+<generatorID>07908A9E-1FB5-CE39-7B9C-AE7AAFFF1A84</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="B2BB4449-1D37-CC89-DBFC-5EF2FE46F369" name="Client_PK">
+<createdBy>DELL</createdBy>
+<createdTime>2024-11-06 17:21:05 UTC</createdTime>
+<generatorID>CE97692B-C8D9-2036-CFD8-B65A93B47199</generatorID>
+<ownerDesignName>Adil_logic</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="802D22D4-9C52-A3DD-4C15-84A496645472"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
