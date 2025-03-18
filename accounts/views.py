@@ -1,5 +1,5 @@
 import json
-from rest_framework.permissions import AllowAny
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import check_password
 from django.core.mail import send_mail
@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -24,8 +24,8 @@ from .serializers import (
     LoginSerializer,
     PasswordResetSerializer,
     RegisterSerializer,
+    UserRegisterSerializer,
     UserSerializer,
-    UserRegisterSerializer
 )
 
 
@@ -157,17 +157,17 @@ class ResetPasswordView(APIView):
 
         return Response(serializer.errors, status=400)
 
+
 class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = [AllowAny]  # 👈 Makes the API public
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         role = self.request.query_params.get("role")
         if role:
-            return self.queryset.filter(role=role.upper())  # Case-insensitive filter
+            return self.queryset.filter(role=role.upper())
         return self.queryset
-
 
 
 class UserDeleteView(generics.DestroyAPIView):
@@ -176,11 +176,13 @@ class UserDeleteView(generics.DestroyAPIView):
     permission_classes = [AllowAny]
 
 
-
-@api_view(['POST'])
+@api_view(["POST"])
 def user_register(request):
     serializer = UserRegisterSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        return Response({"message": "Utilisateur créé avec succès.", "user": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "Utilisateur créé avec succès.", "user": serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

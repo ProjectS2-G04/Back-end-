@@ -3,22 +3,21 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load environment variables
+
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = "django-insecure-_+8u*e6^xp*z)u%+-qs4j#p3e8uktx66f11$1mth&idmg=fmw-"
 
-# SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Application definition
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -30,7 +29,7 @@ INSTALLED_APPS = [
     "accounts",
     "corsheaders",
     "django_extensions",
-    "rest_framework_simplejwt",  # From Code 1
+    "rest_framework_simplejwt",  
 ]
 
 MIDDLEWARE = [
@@ -64,7 +63,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
-# Database
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -72,7 +71,7 @@ DATABASES = {
     }
 }
 
-# Password validation (Kept as in Code 2)
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -88,25 +87,25 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+
 STATIC_URL = "static/"
 
-# Default primary key field type
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# CORS settings
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
-# REST Framework settings (Combining Code 1 & Code 2)
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
@@ -118,7 +117,7 @@ REST_FRAMEWORK = {
 }
 
 
-# Custom user model (From Code 1)
+
 AUTH_USER_MODEL = "accounts.User"
 
 from dotenv import load_dotenv
@@ -133,5 +132,5 @@ EMAIL_HOST_USER = os.getenv("EMAIL_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASS")
 
 
-print("EMAIL_USER:", EMAIL_HOST_USER)  # Debugging line
-print("EMAIL_PASS:", EMAIL_HOST_PASSWORD)  # Debuggi
+print("EMAIL_USER:", EMAIL_HOST_USER) 
+print("EMAIL_PASS:", EMAIL_HOST_PASSWORD)  

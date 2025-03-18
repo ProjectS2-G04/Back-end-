@@ -53,13 +53,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
 
-        sub_role = data.get("sub_role")
-        if sub_role == "ETUDIANT":
-            data["role"] = "ETUDIANT"
-        elif sub_role == "ENSEIGNANT":
-            data["role"] = "ENSEIGNANT"
-        elif sub_role == "ATS":
-            data["role"] = "ATS"
+        # sub_role = data.get("sub_role")
+        # if sub_role == "ETUDIANT":
+        #     data["role"] = "ETUDIANT"
+        # elif sub_role == "ENSEIGNANT":
+        #     data["role"] = "ENSEIGNANT"
+        # elif sub_role == "ATS":
+        #     data["role"] = "ATS"
+        data["role"] = "PATIENT"
 
         return data
 
@@ -80,7 +81,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.is_active = True
         user.save()
         return user
-    
+
+
 class RegisterAdminSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -93,7 +95,6 @@ class RegisterAdminSerializer(serializers.ModelSerializer):
         user.is_active = True
         user.save()
         return user
-
 
 
 class LoginSerializer(serializers.Serializer):
@@ -172,19 +173,20 @@ class ChangePasswordSerializer(serializers.Serializer):
             )
         return value
 
+
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password', 'role']
+        fields = ["first_name", "last_name", "email", "password", "role"]
 
     def create(self, validated_data):
         user = User.objects.create_user(
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            role=validated_data['role'],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            email=validated_data["email"],
+            password=validated_data["password"],
+            role=validated_data["role"],
         )
         return user
