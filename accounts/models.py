@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = None  # Remove username field
     email = models.EmailField(unique=True)
-
+    
     ROLES = (
         ("ADMIN", "Administrateur"),
         ("DOCTOR", "Médecin"),
