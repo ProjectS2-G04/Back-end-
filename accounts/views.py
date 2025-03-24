@@ -1,11 +1,17 @@
 import json
-
-from django.contrib.auth import authenticate
+from django.conf import settings
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import check_password
+from django.contrib.auth.models import update_last_login
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import AuthenticationFailed
@@ -15,7 +21,6 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from backend import settings
-
 from .models import PasswordReset, User
 from .serializers import (
     ChangePasswordSerializer,
@@ -28,33 +33,57 @@ from .serializers import (
     UserSerializer,
 )
 
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            user.is_active = False  
+            user.save()
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            verification_url = request.build_absolute_uri(
+                reverse("verify-email", kwargs={"uidb64": uid, "token": token})
+            )
+            subject = "Verify your email"
+            message = f"Click the link below to verify your email:\n{verification_url}"
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+            return Response(
+                {
+                    "message": "Un lien de vérification a été envoyé à votre adresse email. Veuillez vérifier votre boîte de réception."
+                },
+                status=status.HTTP_201_CREATED,
+            )
 
-class RegisterView(generics.CreateAPIView):
-    serializer_class = RegisterSerializer
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+class VerifyEmailView(APIView):
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = get_object_or_404(User, pk=uid)
+        except (TypeError, ValueError, OverflowError):
+            return JsonResponse({"error": "Invalid token"}, status=400)
 
-        return Response(
-            {
-                "user": UserSerializer(user).data,
-                "message": "Utilisateur créé avec succès.",
-            },
-            status=status.HTTP_201_CREATED,
-        )
-
+        if default_token_generator.check_token(user, token):
+            user.is_active = True
+            user.email_verified = True
+            user.save()
+            return redirect("http://localhost:5173/home")
+        else:
+            return JsonResponse({"error": "Token expired or invalid"}, status=400)
 
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
-
         user = authenticate(request, email=email, password=password)
 
         if user is None:
-            raise AuthenticationFailed("Mot de passe incorrect ou email non trouvé.")
+            return Response({"error": "Email non trouvé ou mot de passe incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.is_active:
+            return Response({"error": "Votre compte n'est pas encore activé. Veuillez vérifier votre email."}, status=status.HTTP_403_FORBIDDEN)
 
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
@@ -66,7 +95,6 @@ class LoginView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-
 
 class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer

@@ -21,6 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
             "role",
             "sub_role",
             "is_active",
+            "email_verified",
         ]
 
 
