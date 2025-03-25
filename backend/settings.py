@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     "accounts",
     "corsheaders",
     "users",
+    
+     "DossierMedicale",
     "django_extensions",
     "rest_framework_simplejwt",  
 ]

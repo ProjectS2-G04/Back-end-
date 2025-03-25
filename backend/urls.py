@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/accounts/", include("accounts.urls")),
     path('api/', include('users.urls')),
+    #path('api/dossier-medicale/', include('DossierMedicale'))
 ]
 
 if settings.DEBUG:
