@@ -84,7 +84,7 @@ class DossierMedical(models.Model):
     reactions_allergiques = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"Dossier médical de {self.patient.username}"
+        return f"Dossier médical de {self.nom} {self.prenom}"
     def save(self, *args, **kwargs):
         if not self.fumeur:
             self.nombre_cigarettes = None  # Réinitialiser si "Non"
