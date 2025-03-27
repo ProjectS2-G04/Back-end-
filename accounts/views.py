@@ -22,6 +22,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from backend import settings
 from .models import PasswordReset, User
+from users.groups import add_user_to_group
 from .serializers import (
     ChangePasswordSerializer,
     CodeSerializer,
@@ -39,6 +40,8 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             user.is_active = False  
+            user.save()
+            add_user_to_group(user.email, "Patient")
             user.save()
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
