@@ -1,5 +1,5 @@
 import re
-
+from DossierMedicale.models import DossierMedical
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -79,6 +79,14 @@ class RegisterSerializer(serializers.ModelSerializer):
             role=validated_data["role"],
             sub_role=validated_data["sub_role"],
         )
+        
+        try:
+            dossier = DossierMedical.objects.get(email=validated_data["email"])
+            dossier.user = user
+            dossier.save()
+        except DossierMedical.DoesNotExist:
+            pass  # No medical record exists, so nothing to link
+        
         user.is_active = True
         user.save()
         return user
