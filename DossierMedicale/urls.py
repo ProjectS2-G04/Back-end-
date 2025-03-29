@@ -1,9 +1,5 @@
 from django.urls import path
-from .views import (
-    DossierMedicalEtudiantView,
-    DossierMedicalEnseignantView,
-    DossierMedicalATSView,
-)
+from .views import *
 
 urlpatterns = [
     path(
@@ -32,4 +28,25 @@ urlpatterns = [
         DossierMedicalATSView.as_view(),
         name="dossiers-ats-detail",
     ),
+    path('search/etudiant/', 
+         search_DossierMedicalEtudian, 
+         name='search-etudiant'
+         ),
+    path('search/enseignant/',
+         search_DossierMedicalEnseignant, 
+         name='search-enseignant'
+         ),
+    path('search/fonctionnaire/', 
+         search_DossierMedicalFonctionnaire, 
+         name='search-fonctionnaire'
+         ),
+    path('dossiers/',
+         consulter_dossier_medical,
+         name='liste-dossiers'
+         ),
+    path('dossiers/<int:dossier_id>/',
+         consulter_dossier_medical, 
+         name='detail-dossier'
+         ),
+
 ]

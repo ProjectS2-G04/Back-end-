@@ -42,6 +42,7 @@ class DossierMedical(models.Model):
     )
 
     # Informations personnelles
+    is_archived =models.BooleanField(default=False) # add is_archived field
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
     date_naissance = models.DateField()

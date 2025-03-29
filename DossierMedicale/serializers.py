@@ -1,10 +1,5 @@
 from rest_framework import serializers
-from .models import (
-    DossierMedical,
-    DossierMedicalEtudian,
-    DossierMedicalEnseignant,
-    DossierMedicalFonctionnaire,
-)
+from .models import *
 from .models import validate_phone_number, validate_email
 
 
@@ -39,3 +34,19 @@ class DossierMedicalAtsSerializer(DossierMedicalSerializer):
     class Meta:
         model = DossierMedicalFonctionnaire
         fields = "__all__"
+
+
+class DossierMedicalEtudianSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DossierMedicalEtudian
+        fields = '__all__'
+
+class DossierMedicalEnseignantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DossierMedicalEnseignant
+        fields = '__all__'
+
+class DossierMedicalFonctionnaireSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DossierMedicalFonctionnaire
+        fields = '__all__'
