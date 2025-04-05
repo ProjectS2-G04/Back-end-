@@ -1,7 +1,8 @@
-from django.db import models
-from accounts.models import User
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db import models
+
+from accounts.models import User
 
 
 def validate_phone_number(value):
@@ -36,13 +37,12 @@ class DossierMedical(models.Model):
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
-    ) # I've modified here
+    )
     photo = models.ImageField(
         upload_to="profile_pics", default="profile_pics/image.jpg"
     )
 
-    # Informations personnelles
-    is_archived =models.BooleanField(default=False) # add is_archived field
+    is_archived = models.BooleanField(default=False)
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
     date_naissance = models.DateField()
@@ -63,13 +63,11 @@ class DossierMedical(models.Model):
     situation_familiale = models.CharField(max_length=100, null=True, blank=True)
     admission_etablissement = models.BooleanField(default=True)
 
-    # Données biométriques
     taille = models.FloatField(null=True, blank=True)
     poids = models.FloatField(null=True, blank=True)
     frequence_cardiaque = models.FloatField(null=True, blank=True)
     pression_arterielle = models.CharField(max_length=20, null=True, blank=True)
 
-    # Informations médicales
     numero_dossier = models.CharField(max_length=50, unique=True)
 
     groupe_sanguin = models.CharField(
@@ -80,7 +78,6 @@ class DossierMedical(models.Model):
         max_length=50, unique=True, null=True, blank=True
     )
 
-    # Intoxications (Tabac)
     fumeur = models.BooleanField(default=False)
     nombre_cigarettes = models.IntegerField(null=True, blank=True)
     chiqueur = models.BooleanField(default=False)
@@ -90,7 +87,7 @@ class DossierMedical(models.Model):
     age_premiere_prise = models.IntegerField(null=True, blank=True)
     ancien_fumeur = models.BooleanField(default=False)
     nombre_boites_fumeur = models.IntegerField(null=True, blank=True)
-    # Antécédents médicaux
+
     affections_congenitales = models.TextField(null=True, blank=True)
     maladies_generales = models.TextField(null=True, blank=True)
     interventions_chirurgicales = models.TextField(null=True, blank=True)
@@ -115,9 +112,24 @@ class DossierMedical(models.Model):
         super().save(*args, **kwargs)
 
 
-class DossierMedicalEtudian(DossierMedical):
+class Document(models.Model):
+    title = models.CharField(max_length=255)
+    file = models.FileField(upload_to="uploads/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    dossier_medical = models.ForeignKey(
+        DossierMedical, on_delete=models.CASCADE, null=True, blank=True
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class DossierMedicalEtudiant(DossierMedical):
     Filiere = models.CharField(max_length=30)
     Niveau = models.CharField(max_length=20)
+    dossier_documents = models.ManyToManyField(
+        Document, related_name="etudiants", blank=True
+    )
 
 
 class DossierMedicalEnseignant(DossierMedical):
@@ -125,6 +137,5 @@ class DossierMedicalEnseignant(DossierMedical):
     specialite = models.CharField(max_length=100)
 
 
-# Fonctionnaire Model (Extends DossierMedical)
 class DossierMedicalFonctionnaire(DossierMedical):
     grade = models.FloatField(max_length=20)
