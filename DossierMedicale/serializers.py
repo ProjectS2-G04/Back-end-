@@ -1,6 +1,7 @@
 from rest_framework import serializers
+
 from .models import *
-from .models import validate_phone_number, validate_email
+from .models import validate_email, validate_phone_number
 
 
 
@@ -34,6 +35,7 @@ class ArchiveDossierMedicalSerializer(serializers.ModelSerializer):
 
         
 class DossierMedicalSerializer(serializers.ModelSerializer):
+    dossier_pdf_url = serializers.SerializerMethodField()
 
     def validate_numero_telephone(self, value):
         validate_phone_number(value)
@@ -47,10 +49,18 @@ class DossierMedicalSerializer(serializers.ModelSerializer):
         model = DossierMedical
         fields = "__all__"
 
+    def get_dossier_pdf_url(self, obj):
+        request = self.context.get("request")  # Get request from context
+        if obj.document_set.exists():
+            document = obj.document_set.first()
+            if document.file:
+                return request.build_absolute_uri(document.file.url)
+        return None
+
 
 class DossierMedicalEtudiantSerializer(DossierMedicalSerializer):
     class Meta:
-        model = DossierMedicalEtudian
+        model = DossierMedicalEtudiant
         fields = "__all__"
 
 
@@ -66,17 +76,13 @@ class DossierMedicalAtsSerializer(DossierMedicalSerializer):
         fields = "__all__"
 
 
-class DossierMedicalEtudianSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DossierMedicalEtudian
-        fields = '__all__'
-
-class DossierMedicalEnseignantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DossierMedicalEnseignant
-        fields = '__all__'
-
 class DossierMedicalFonctionnaireSerializer(serializers.ModelSerializer):
     class Meta:
         model = DossierMedicalFonctionnaire
-        fields = '__all__'
+        fields = "__all__"
+
+
+class DocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Document
+        fields = "__all__"
