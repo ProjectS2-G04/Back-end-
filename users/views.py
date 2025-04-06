@@ -56,23 +56,6 @@ class RegisterAdminView(generics.CreateAPIView):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class GroupMembersAPIView(APIView):
 
     def get(self, request):
