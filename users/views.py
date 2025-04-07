@@ -63,33 +63,22 @@ class GroupMembersAPIView(APIView):
     
 
 class ListGroupAPIView(APIView):
-
     group_name = None 
 
-    def get (self, request):
-        
-        
+    def get(self, request):
         try:
             group = Group.objects.get(name=self.group_name)
             members = group.accounts_user_set.all()
-
-            if not members.exists():
-                return Response(
-                    {"message": f"⚠️ Aucun membre trouvé dans le groupe '{self.group_name}'."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-
             serializer = MembersSerializer(members, many=True)
             return Response(
                 {"group": self.group_name, "members": serializer.data},
                 status=status.HTTP_200_OK
             )
-
         except Group.DoesNotExist:
             return Response(
-                {"error": f"❌ Le groupe '{self.group_name}' n'existe pas."},
-                status=status.HTTP_404_NOT_FOUND
-            )    
+                {"group": self.group_name, "members": []},  # Return empty list
+                status=status.HTTP_200_OK
+            )
 class ListAdminAPIView(ListGroupAPIView):
     group_name = "Admin"
 

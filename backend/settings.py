@@ -1,9 +1,8 @@
-from datetime import timedelta
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
@@ -30,10 +29,9 @@ INSTALLED_APPS = [
     "accounts",
     "corsheaders",
     "users",
-    
-     "DossierMedicale",
+    "DossierMedicale",
     "django_extensions",
-    "rest_framework_simplejwt",  
+    "rest_framework_simplejwt",
 ]
 
 MIDDLEWARE = [
@@ -99,8 +97,8 @@ USE_TZ = True
 
 
 STATIC_URL = "static/"
-MEDIA_URL = '/media/'  # URL to access media files
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
+MEDIA_URL = "/media/"  # URL to access media files
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -123,7 +121,6 @@ REST_FRAMEWORK = {
 }
 
 
-
 AUTH_USER_MODEL = "accounts.User"
 
 from dotenv import load_dotenv
@@ -140,8 +137,18 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASS")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Access token expiration time
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Refresh token expiration time
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),  # Access token expiration time
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  # Refresh token expiration time
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+}
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "": {"handlers": ["console"], "level": "INFO"},
+    },
 }

@@ -393,18 +393,15 @@ class GenerateMedicalFormPDF(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # Retrieve the data submitted by the doctor (assuming it comes in JSON format)
-        data = request.data  # This could be in JSON format with form fields
 
-        # Ensure data is received
+        data = request.data
+
         if not data:
             return Response({"error": "Form data is missing!"}, status=400)
 
-        # Create an in-memory file buffer to store the PDF
         buffer = BytesIO()
         pdf = canvas.Canvas(buffer)
 
-        # Example of adding the form fields dynamically to the PDF
         pdf.drawString(100, 800, f"Patient Name: {data.get('name', 'N/A')}")
         pdf.drawString(100, 780, f"Patient Age: {data.get('age', 'N/A')}")
         pdf.drawString(
@@ -415,21 +412,17 @@ class GenerateMedicalFormPDF(APIView):
         )
         pdf.drawString(100, 720, f"Doctor's Notes: {data.get('doctors_notes', 'N/A')}")
 
-        # Finish the PDF page
         pdf.showPage()
         pdf.save()
 
-        # Save the PDF to the Document model
-        pdf_data = buffer.getvalue()  # Get PDF data from buffer
+        pdf_data = buffer.getvalue()
         buffer.close()
 
-        # Create a Document instance and save the file
         document = Document()
         document.title = f"Medical Form - {data.get('name', 'Unknown')}"
         document.file.save("medical_form.pdf", ContentFile(pdf_data))
         document.save()
 
-        # Return PDF as response to the user
         response = HttpResponse(pdf_data, content_type="application/pdf")
         response["Content-Disposition"] = 'inline; filename="medical_form.pdf"'
         return response
@@ -437,14 +430,12 @@ class GenerateMedicalFormPDF(APIView):
 
 class DownloadMedicalForm(APIView):
     def get(self, request, document_id):
-        # Get the document instance by its ID
         document = get_object_or_404(Document, id=document_id)
 
-        # Open the file
-        file_path = document.file.path  # Assuming the PDF is stored in the file field
+        file_path = document.file.path
         try:
             with open(file_path, "rb") as file:
-                # Return the file as an HTTP response
+
                 response = HttpResponse(file.read(), content_type="application/pdf")
                 response["Content-Disposition"] = (
                     f'attachment; filename="{document.title}"'
