@@ -4,6 +4,36 @@ from .models import *
 from .models import validate_email, validate_phone_number
 
 
+
+
+
+
+
+class DossierMedicaleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DossierMedical
+        fields = [ "id" , "nom" , "prenom"]
+
+
+
+"""
+class ArchiveDossierMedicalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DossierMedical
+        fields = ["id", "nom", "prenom"]
+
+    def update(self, instance, validated_data):
+        instance.is_archived = True  # Set is_archived to True
+        instance.save()
+        return instance"""
+
+
+
+
+
+
+
+        
 class DossierMedicalSerializer(serializers.ModelSerializer):
     dossier_pdf_url = serializers.SerializerMethodField()
 

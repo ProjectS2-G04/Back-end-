@@ -133,9 +133,9 @@ class DossierMedicalEtudiant(DossierMedical):
 
 
 class DossierMedicalEnseignant(DossierMedical):
-    grade = models.FloatField(max_length=20)
+    grade = models.CharField(max_length=20)
     specialite = models.CharField(max_length=100)
 
 
 class DossierMedicalFonctionnaire(DossierMedical):
-    grade = models.FloatField(max_length=20)
+    grade = models.CharField(max_length=20)

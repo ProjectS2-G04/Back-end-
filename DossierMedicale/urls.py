@@ -9,6 +9,34 @@ router = DefaultRouter()
 router.register(r'documents', DocumentViewSet)
 
 urlpatterns = [
+    
+
+path('search-enseignant/', DossierMedicalEnseignantSearchView.as_view(), name='search-enseignant'),
+path('search-etudiant/', DossierMedicalEtudiantSearchView.as_view(), name='search-enseignant'),
+path('search-fonctionnaire/', DossierMedicalFonctionnaireSearchView.as_view(), name='search-enseignant'),
+path("etudiants/", DossierMedicalEtudianListView.as_view(), name="etudiants-list"),
+path("enseignants/", DossierMedicalEnseignantListView.as_view(), name="enseignants-list"),
+path("fonctionnaires/", DossierMedicalFonctionnaireListView.as_view(), name="fonctionnaires-list"),
+path("archive/<int:pk>/", ArchiveDossierMedicalView.as_view(), name="archive-dossier"),
+path("activate/<int:pk>/", ActivateUserView.as_view(), name="activate-user"),
+path("desactivate/<int:pk>/", DesactivateUserView.as_view(), name="desactivate-user"),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     path(
         "dossiers/etudiants/",
         DossierMedicalEtudiantView.as_view(),

@@ -53,7 +53,7 @@ class RegisterAdminView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
-    
+
 class GroupMembersAPIView(APIView):
 
     def get(self, request):

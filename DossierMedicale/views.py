@@ -11,9 +11,181 @@ from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import FormParser, MultiPartParser
-
+from rest_framework.views import APIView
 # from .permissions import check_doctor_permission
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
+from rest_framework import generics
+from accounts.models import User
+from .models import *
+from .serializers import *
+class ActivateUserView(APIView):
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk)  # Get the user by ID
+        
+        if user.is_active:
+            return Response({"message": "This user is already active."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.is_active = True  # Activate the user
+        user.save()
+        
+        return Response({"message": "User activated successfully."}, status=status.HTTP_200_OK)
+
+class DesactivateUserView(APIView):
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk)  # Get the user by ID
+        
+        if  not user.is_active:
+            return Response({"message": "This user is already inactive."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.is_active = False  # Activate the user
+        user.save()
+        
+        return Response({"message": "User desactivated successfully."}, status=status.HTTP_200_OK)
+
+
+
+class ArchiveDossierMedicalView(APIView):
+    def post(self, request, pk):
+        dossier = get_object_or_404(DossierMedical, pk=pk)
+        dossier.is_archived = True
+        dossier.save()
+        return Response({"message": "Dossier archived successfully"}, status=status.HTTP_200_OK)
+
+
+
+
+class DossierMedicalEtudianListView(generics.ListAPIView):
+    queryset = DossierMedicalEtudiant.objects.filter(is_archived=False)
+    serializer_class = DossierMedicaleSerializer
+
+class DossierMedicalEnseignantListView(generics.ListAPIView):
+    queryset = DossierMedicalEnseignant.objects.filter(is_archived=False)
+    serializer_class = DossierMedicaleSerializer
+
+class DossierMedicalFonctionnaireListView(generics.ListAPIView):
+    queryset = DossierMedicalFonctionnaire.objects.filter(is_archived=False)
+    serializer_class = DossierMedicaleSerializer
+
+
+
+
+
+
+
+
+
+
+
+
+class DossierMedicalSearchView(ListAPIView):
+    queryset = None
+    serializer_class = DossierMedicaleSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['nom', 'prenom']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+
+        if search_query:
+            queryset = queryset.filter(nom__istartswith=search_query) | queryset.filter(prenom__istartswith=search_query)
+        
+        
+        return queryset 
+
+class DossierMedicalEnseignantSearchView(DossierMedicalSearchView):
+
+      queryset = DossierMedicalEnseignant.objects.all()
+
+class DossierMedicalEtudiantSearchView(DossierMedicalSearchView):
+
+      queryset = DossierMedicalEtudiant.objects.all()
+
+
+class DossierMedicalFonctionnaireSearchView(DossierMedicalSearchView):
+
+      queryset = DossierMedicalFonctionnaire.objects.all()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
