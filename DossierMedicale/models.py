@@ -61,7 +61,7 @@ class DossierMedical(models.Model):
     )
     service = models.CharField(max_length=100, null=True, blank=True)
     situation_familiale = models.CharField(max_length=100, null=True, blank=True)
-    admission_etablissement = models.BooleanField(default=True)
+    admission_etablissement = models.CharField(max_length=50, default="Oui")
 
     taille = models.FloatField(null=True, blank=True)
     poids = models.FloatField(null=True, blank=True)

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
-from accounts.models import User  # Assurez-vous d'importer votre modèle User
+from accounts.models import User 
 
 def creer_permission(codename, nom):
     """Créer une nouvelle permission"""
@@ -16,7 +16,7 @@ def creer_permission(codename, nom):
         print(f"⚠️ La permission '{nom}' existe déjà.")
     return permission
 
-#creer_permission("can_manage_roles", "Peut gérer les rôles")
+
 
 
 def ajouter_permission_au_groupe(nom_groupe, codename_perm):
@@ -30,7 +30,7 @@ def ajouter_permission_au_groupe(nom_groupe, codename_perm):
         print(f"⚠️ La permission '{codename_perm}' n'existe pas.")
 
 
-#ajouter_permission_au_groupe("Admin", "can_manage_roles")
+
 
 def add_user_to_group(user_email, group_name):
     """Add a user to a group"""
