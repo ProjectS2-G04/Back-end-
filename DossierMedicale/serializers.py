@@ -44,16 +44,19 @@ class DossierMedicalEtudiantSerializer(DossierMedicalSerializer):
         fields = "__all__"
 
 class DossierMedicalEnseignantSerializer(DossierMedicalSerializer):
+    dossier_documents = DocumentSerializer(many=True, read_only=True)
     class Meta:
         model = DossierMedicalEnseignant
         fields = "__all__"
 
 class DossierMedicalAtsSerializer(DossierMedicalSerializer):
+    dossier_documents = DocumentSerializer(many=True, read_only=True)
     class Meta:
         model = DossierMedicalFonctionnaire
         fields = "__all__"
 
 class DossierMedicalFonctionnaireSerializer(serializers.ModelSerializer):
+   
     class Meta:
         model = DossierMedicalFonctionnaire
         fields = "__all__"

@@ -23,19 +23,6 @@ path("desactivate/<int:pk>/", DesactivateUserView.as_view(), name="desactivate-u
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     
     path(
         "dossiers/etudiants/",

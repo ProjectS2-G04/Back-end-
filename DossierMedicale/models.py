@@ -135,7 +135,13 @@ class DossierMedicalEtudiant(DossierMedical):
 class DossierMedicalEnseignant(DossierMedical):
     grade = models.CharField(max_length=20)
     specialite = models.CharField(max_length=100)
+    dossier_documents = models.ManyToManyField(
+        Document, related_name="enseignants", blank=True
+    )
 
 
 class DossierMedicalFonctionnaire(DossierMedical):
     grade = models.CharField(max_length=20)
+    dossier_documents = models.ManyToManyField(
+        Document, related_name="fonctionnaires", blank=True
+    )
