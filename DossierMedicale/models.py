@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-
+import uuid
 from accounts.models import User
 
 
@@ -33,6 +33,11 @@ class DossierMedical(models.Model):
         ("O-", "O-"),
         ("AB+", "AB+"),
         ("AB-", "AB-"),
+    ]
+
+    SEXE_CHOICES = [
+        ("Homme", "Homme"),
+        ("Femme", "Femme"),
     ]
 
     user = models.OneToOneField(
@@ -78,6 +83,12 @@ class DossierMedical(models.Model):
         max_length=50, unique=True, null=True, blank=True
     )
 
+    sexe = models.CharField(
+        max_length=10,
+        choices=SEXE_CHOICES,
+        default="Homme",
+    )
+
     fumeur = models.BooleanField(default=False)
     nombre_cigarettes = models.IntegerField(null=True, blank=True)
     chiqueur = models.BooleanField(default=False)
@@ -95,9 +106,23 @@ class DossierMedical(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.numero_dossier:  # Only generate if not already set
-            last_dossier = DossierMedical.objects.order_by('-id').first()
-            last_num = int(last_dossier.numero_dossier[3:]) if last_dossier and last_dossier.numero_dossier.startswith("DOS") else 0
-            self.numero_dossier = f"DOS{last_num + 1:03d}"  # e.g., DOS001, DOS002
+            last_dossier = DossierMedical.objects.order_by("-id").first()
+            last_num = 0  # Default to 0 if no valid dossier exists
+            if (
+                last_dossier
+                and last_dossier.numero_dossier
+                and last_dossier.numero_dossier.startswith("DOS")
+            ):
+                try:
+                    last_num = int(last_dossier.numero_dossier[3:])
+                except ValueError:
+                    print(
+                        f"Invalid numero_dossier format: {last_dossier.numero_dossier}"
+                    )
+                    last_num = 0
+            self.numero_dossier = f"DOS{last_num + 1:03d}"  # e.g., DOS001
+
+        # Nullify fields based on conditions
         if not self.fumeur:
             self.nombre_cigarettes = None
         if not self.chiqueur:
@@ -106,6 +131,7 @@ class DossierMedical(models.Model):
             self.nombre_boites_autre = None
         if not self.ancien_fumeur:
             self.nombre_boites_fumeur = None
+
         super().save(*args, **kwargs)
 
     def __str__(self):
