@@ -1,28 +1,21 @@
 import os
-from io import BytesIO
-
-from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework import generics
 from accounts.models import User
 from .models import *
 from .serializers import *
+from .utils.pdf_generator import generate_medical_pdf
 
 class ActivateUserView(APIView):
     def post(self, request, pk):
@@ -48,7 +41,6 @@ class ArchiveDossierMedicalView(APIView):
         dossier.is_archived = True
         dossier.save()
         return Response({"message": "Dossier archived successfully"}, status=status.HTTP_200_OK)
-    
 
 class DossierMedicalEtudianListView(generics.ListAPIView):
     queryset = DossierMedicalEtudiant.objects.filter(is_archived=False)
@@ -94,94 +86,15 @@ class DossierMedicalEtudiantView(APIView):
         else:
             dossiers = DossierMedicalEtudiant.objects.all()
             serializer = DossierMedicalEtudiantSerializer(dossiers, many=True, context={"request": request})
-        return Response(serializer.data)  # Positional argument
+        return Response(serializer.data)
 
     def post(self, request):
         try:
             serializer = DossierMedicalEtudiantSerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
                 dossier = serializer.save()
-
-                # Generate styled PDF
-                buffer = BytesIO()
-                pdf = canvas.Canvas(buffer, pagesize=letter)
-                width, height = letter
-
-                # Header
-                pdf.setFillColorRGB(0.29, 0.63, 0.66)  # #4BA0A8
-                pdf.setFont("Helvetica-Bold", 16)
-                pdf.drawCentredString(width / 2, height - 40, "FICHE MÉDICALE")
-                pdf.setFont("Helvetica", 10)
-                pdf.drawCentredString(width / 2, height - 60, "République Algérienne Démocratique et Populaire")
-                pdf.drawCentredString(width / 2, height - 75, "École Nationale Supérieure d'Informatique")
-                pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-                pdf.setLineWidth(2)
-                pdf.line(50, height - 80, width - 50, height - 80)
-
-                # Personal Info Section
-                pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-                pdf.setFont("Helvetica-Bold", 12)
-                pdf.drawString(50, height - 100, "Informations Personnelles")
-                pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-                pdf.rect(50, height - 240, width - 100, 130, stroke=1, fill=0)
-                pdf.setFillColorRGB(0, 0, 0)  # Black for text
-                pdf.setFont("Helvetica", 10)
-                y = height - 120
-                personal_fields = [
-                    ("Nom", "nom"), ("Prénom", "prenom"), ("Date de naissance", "date_naissance"),
-                    ("Lieu de naissance", "lieu_naissance"), ("Adresse", "adresse"),
-                    ("Numéro de téléphone", "numero_telephone"), ("Email", "email"),
-                    ("Situation familiale", "situation_familiale"), ("Admis(e)", "admission_etablissement"),
-                    ("Filière", "Filiere"), ("Niveau", "Niveau"), ("N° dossier", "numero_dossier"),
-                    ("Groupe sanguin", "groupe_sanguin"), ("N° sécurité sociale", "numero_securite_sociale")
-                ]
-                x_label, x_value = 60, 200
-                for label, key in personal_fields[:7]:
-                    value = request.data.get(key, "N/A")
-                    pdf.drawString(x_label, y, f"{label}:")
-                    pdf.drawString(x_value, y, str(value))
-                    y -= 15
-                y = height - 120
-                for label, key in personal_fields[7:]:
-                    value = request.data.get(key, "N/A")
-                    pdf.drawString(x_label + 300, y, f"{label}:")
-                    pdf.drawString(x_value + 300, y, str(value))
-                    y -= 15
-
-                # Biometric Data Section
-                pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-                pdf.setFont("Helvetica-Bold", 12)
-                pdf.drawString(50, height - 260, "Données Biométriques")
-                pdf.line(50, height - 265, 200, height - 265)  # Underline
-                pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-                pdf.rect(50, height - 340, width - 100, 70, stroke=1, fill=0)
-                pdf.setFillColorRGB(0, 0, 0)
-                pdf.setFont("Helvetica", 10)
-                y = height - 280
-                biometric_fields = [
-                    ("Taille (cm)", "taille"), ("Poids (kg)", "poids"),
-                    ("Fréquence cardiaque (bpm)", "frequence_cardiaque"), ("Pression artérielle", "pression_arterielle")
-                ]
-                for label, key in biometric_fields:
-                    value = request.data.get(key, "N/A")
-                    pdf.drawString(x_label, y, f"{label}:")
-                    pdf.drawString(x_value, y, str(value))
-                    y -= 15
-
-                pdf.showPage()
-                pdf.save()
-                pdf_data = buffer.getvalue()
-                buffer.close()
-
-                document = Document(
-                    title=f"Dossier_{dossier.nom}_{dossier.prenom}_{dossier.numero_dossier}.pdf",
-                    dossier_medical=dossier
-                )
-                document.file.save(document.title, ContentFile(pdf_data))
-                document.save()
-                dossier.dossier_documents.add(document)
-
-                return Response(serializer.data, status=status.HTTP_201_CREATED)  # Consistent usage
+                generate_medical_pdf(dossier, serializer.data, "etudiant", Document)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             import traceback
@@ -193,92 +106,8 @@ class DossierMedicalEtudiantView(APIView):
         serializer = DossierMedicalEtudiantSerializer(dossier, data=request.data, partial=True, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-
-            # Generate styled PDF
-            buffer = BytesIO()
-            pdf = canvas.Canvas(buffer, pagesize=letter)
-            width, height = letter
-
-            # Header
-            pdf.setFillColorRGB(0.29, 0.63, 0.66)  # #4BA0A8
-            pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawCentredString(width / 2, height - 40, "FICHE MÉDICALE")
-            pdf.setFont("Helvetica", 10)
-            pdf.drawCentredString(width / 2, height - 60, "République Algérienne Démocratique et Populaire")
-            pdf.drawCentredString(width / 2, height - 75, "École Nationale Supérieure d'Informatique")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.setLineWidth(2)
-            pdf.line(50, height - 80, width - 50, height - 80)
-
-            # Personal Info Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 100, "Informations Personnelles")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 240, width - 100, 130, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 120
-            personal_fields = [
-                ("Nom", "nom"), ("Prénom", "prenom"), ("Date de naissance", "date_naissance"),
-                ("Lieu de naissance", "lieu_naissance"), ("Adresse", "adresse"),
-                ("Numéro de téléphone", "numero_telephone"), ("Email", "email"),
-                ("Situation familiale", "situation_familiale"), ("Admis(e)", "admission_etablissement"),
-                ("Filière", "Filiere"), ("Niveau", "Niveau"), ("N° dossier", "numero_dossier"),
-                ("Groupe sanguin", "groupe_sanguin"), ("N° sécurité sociale", "numero_securite_sociale")
-            ]
-            x_label, x_value = 60, 200
-            for label, key in personal_fields[:7]:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-            y = height - 120
-            for label, key in personal_fields[7:]:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label + 300, y, f"{label}:")
-                pdf.drawString(x_value + 300, y, str(value))
-                y -= 15
-
-            # Biometric Data Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 260, "Données Biométriques")
-            pdf.line(50, height - 265, 200, height - 265)  # Underline
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 340, width - 100, 70, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 280
-            biometric_fields = [
-                ("Taille (cm)", "taille"), ("Poids (kg)", "poids"),
-                ("Fréquence cardiaque (bpm)", "frequence_cardiaque"), ("Pression artérielle", "pression_arterielle")
-            ]
-            for label, key in biometric_fields:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-
-            pdf.showPage()
-            pdf.save()
-            pdf_data = buffer.getvalue()
-            buffer.close()
-
-            # Update or create PDF
-            if dossier.dossier_documents.exists():
-                document = dossier.dossier_documents.first()
-                document.file.save(document.title, ContentFile(pdf_data))
-            else:
-                document = Document(
-                    title=f"Dossier_{dossier.nom}_{dossier.prenom}_{dossier.numero_dossier}.pdf",
-                    dossier_medical=dossier
-                )
-                document.file.save(document.title, ContentFile(pdf_data))
-                document.save()
-                dossier.dossier_documents.add(document)
-
-            return Response(serializer.data)  # Consistent usage
+            generate_medical_pdf(dossier, serializer.data, "etudiant", Document)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class DossierMedicalEnseignantView(APIView):
@@ -297,86 +126,7 @@ class DossierMedicalEnseignantView(APIView):
         serializer = DossierMedicalEnseignantSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-
-            # Generate styled PDF
-            buffer = BytesIO()
-            pdf = canvas.Canvas(buffer, pagesize=letter)
-            width, height = letter
-
-            # Header
-            pdf.setFillColorRGB(0.29, 0.63, 0.66)  # #4BA0A8
-            pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawCentredString(width / 2, height - 40, "FICHE MÉDICALE")
-            pdf.setFont("Helvetica", 10)
-            pdf.drawCentredString(width / 2, height - 60, "République Algérienne Démocratique et Populaire")
-            pdf.drawCentredString(width / 2, height - 75, "École Nationale Supérieure d'Informatique")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.setLineWidth(2)
-            pdf.line(50, height - 80, width - 50, height - 80)
-
-            # Personal Info Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 100, "Informations Personnelles")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 240, width - 100, 130, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 120
-            personal_fields = [
-                ("Nom", "nom"), ("Prénom", "prenom"), ("Date de naissance", "date_naissance"),
-                ("Lieu de naissance", "lieu_naissance"), ("Adresse", "adresse"),
-                ("Numéro de téléphone", "numero_telephone"), ("Email", "email"),
-                ("Situation familiale", "situation_familiale"), ("Admis(e)", "admission_etablissement"),
-                ("Grade", "grade"), ("Spécialité", "specialite"), ("N° dossier", "numero_dossier"),
-                ("Groupe sanguin", "groupe_sanguin"), ("N° sécurité sociale", "numero_securite_sociale")
-            ]
-            x_label, x_value = 60, 200
-            for label, key in personal_fields[:7]:
-                value = request.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-            y = height - 120
-            for label, key in personal_fields[7:]:
-                value = request.data.get(key, "N/A")
-                pdf.drawString(x_label + 300, y, f"{label}:")
-                pdf.drawString(x_value + 300, y, str(value))
-                y -= 15
-
-            # Biometric Data Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 260, "Données Biométriques")
-            pdf.line(50, height - 265, 200, height - 265)
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 340, width - 100, 70, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 280
-            biometric_fields = [
-                ("Taille (cm)", "taille"), ("Poids (kg)", "poids"),
-                ("Fréquence cardiaque (bpm)", "frequence_cardiaque"), ("Pression artérielle", "pression_arterielle")
-            ]
-            for label, key in biometric_fields:
-                value = request.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-
-            pdf.showPage()
-            pdf.save()
-            pdf_data = buffer.getvalue()
-            buffer.close()
-
-            document = Document(
-                title=f"Dossier_{dossier.nom}_{dossier.prenom}_{dossier.numero_dossier}.pdf",
-                dossier_medical=dossier
-            )
-            document.file.save(document.title, ContentFile(pdf_data))
-            document.save()
-            dossier.dossier_documents.add(document)
-
+            generate_medical_pdf(dossier, serializer.data, "enseignant", Document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -385,93 +135,8 @@ class DossierMedicalEnseignantView(APIView):
         serializer = DossierMedicalEnseignantSerializer(dossier, data=request.data, partial=True, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-
-            # Generate styled PDF
-            buffer = BytesIO()
-            pdf = canvas.Canvas(buffer, pagesize=letter)
-            width, height = letter
-
-            # Header
-            pdf.setFillColorRGB(0.29, 0.63, 0.66)  # #4BA0A8
-            pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawCentredString(width / 2, height - 40, "FICHE MÉDICALE")
-            pdf.setFont("Helvetica", 10)
-            pdf.drawCentredString(width / 2, height - 60, "République Algérienne Démocratique et Populaire")
-            pdf.drawCentredString(width / 2, height - 75, "École Nationale Supérieure d'Informatique")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.setLineWidth(2)
-            pdf.line(50, height - 80, width - 50, height - 80)
-
-            # Personal Info Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 100, "Informations Personnelles")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 240, width - 100, 130, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 120
-            personal_fields = [
-                ("Nom", "nom"), ("Prénom", "prenom"), ("Date de naissance", "date_naissance"),
-                ("Lieu de naissance", "lieu_naissance"), ("Adresse", "adresse"),
-                ("Numéro de téléphone", "numero_telephone"), ("Email", "email"),
-                ("Situation familiale", "situation_familiale"), ("Admis(e)", "admission_etablissement"),
-                ("Grade", "grade"), ("Spécialité", "specialite"), ("N° dossier", "numero_dossier"),
-                ("Groupe sanguin", "groupe_sanguin"), ("N° sécurité sociale", "numero_securite_sociale")
-            ]
-            x_label, x_value = 60, 200
-            for label, key in personal_fields[:7]:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-            y = height - 120
-            for label, key in personal_fields[7:]:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label + 300, y, f"{label}:")
-                pdf.drawString(x_value + 300, y, str(value))
-                y -= 15
-
-            # Biometric Data Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 260, "Données Biométriques")
-            pdf.line(50, height - 265, 200, height - 265)
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 340, width - 100, 70, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 280
-            biometric_fields = [
-                ("Taille (cm)", "taille"), ("Poids (kg)", "poids"),
-                ("Fréquence cardiaque (bpm)", "frequence_cardiaque"), ("Pression artérielle", "pression_arterielle")
-            ]
-            for label, key in biometric_fields:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-
-            pdf.showPage()
-            pdf.save()
-            pdf_data = buffer.getvalue()
-            buffer.close()
-
-            # Update or create PDF
-            if dossier.dossier_documents.exists():
-                document = dossier.dossier_documents.first()
-                document.file.save(document.title, ContentFile(pdf_data))
-            else:
-                document = Document(
-                    title=f"Dossier_{dossier.nom}_{dossier.prenom}_{dossier.numero_dossier}.pdf",
-                    dossier_medical=dossier
-                )
-                document.file.save(document.title, ContentFile(pdf_data))
-                document.save()
-                dossier.dossier_documents.add(document)
-
+            generate_medical_pdf(dossier, serializer.data, "enseignant", Document)
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class DossierMedicalATSView(APIView):
@@ -490,86 +155,7 @@ class DossierMedicalATSView(APIView):
         serializer = DossierMedicalAtsSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-
-            # Generate styled PDF
-            buffer = BytesIO()
-            pdf = canvas.Canvas(buffer, pagesize=letter)
-            width, height = letter
-
-            # Header
-            pdf.setFillColorRGB(0.29, 0.63, 0.66)  # #4BA0A8
-            pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawCentredString(width / 2, height - 40, "FICHE MÉDICALE")
-            pdf.setFont("Helvetica", 10)
-            pdf.drawCentredString(width / 2, height - 60, "République Algérienne Démocratique et Populaire")
-            pdf.drawCentredString(width / 2, height - 75, "École Nationale Supérieure d'Informatique")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.setLineWidth(2)
-            pdf.line(50, height - 80, width - 50, height - 80)
-
-            # Personal Info Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 100, "Informations Personnelles")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 240, width - 100, 130, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 120
-            personal_fields = [
-                ("Nom", "nom"), ("Prénom", "prenom"), ("Date de naissance", "date_naissance"),
-                ("Lieu de naissance", "lieu_naissance"), ("Adresse", "adresse"),
-                ("Numéro de téléphone", "numero_telephone"), ("Email", "email"),
-                ("Situation familiale", "situation_familiale"), ("Admis(e)", "admission_etablиваement"),
-                ("Grade", "grade"), ("N° dossier", "numero_dossier"),
-                ("Groupe sanguin", "groupe_sanguin"), ("N° sécurité sociale", "numero_securite_sociale")
-            ]
-            x_label, x_value = 60, 200
-            for label, key in personal_fields[:7]:
-                value = request.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-            y = height - 120
-            for label, key in personal_fields[7:]:
-                value = request.data.get(key, "N/A")
-                pdf.drawString(x_label + 300, y, f"{label}:")
-                pdf.drawString(x_value + 300, y, str(value))
-                y -= 15
-
-            # Biometric Data Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 260, "Données Biométriques")
-            pdf.line(50, height - 265, 200, height - 265)
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 340, width - 100, 70, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 280
-            biometric_fields = [
-                ("Taille (cm)", "taille"), ("Poids (kg)", "poids"),
-                ("Fréquence cardiaque (bpm)", "frequence_cardiaque"), ("Pression artérielle", "pression_arterielle")
-            ]
-            for label, key in biometric_fields:
-                value = request.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-
-            pdf.showPage()
-            pdf.save()
-            pdf_data = buffer.getvalue()
-            buffer.close()
-
-            document = Document(
-                title=f"Dossier_{dossier.nom}_{dossier.prenom}_{dossier.numero_dossier}.pdf",
-                dossier_medical=dossier
-            )
-            document.file.save(document.title, ContentFile(pdf_data))
-            document.save()
-            dossier.dossier_documents.add(document)
-
+            generate_medical_pdf(dossier, serializer.data, "ats", Document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -578,91 +164,7 @@ class DossierMedicalATSView(APIView):
         serializer = DossierMedicalAtsSerializer(dossier, data=request.data, partial=True, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-
-            # Generate styled PDF
-            buffer = BytesIO()
-            pdf = canvas.Canvas(buffer, pagesize=letter)
-            width, height = letter
-
-            # Header
-            pdf.setFillColorRGB(0.29, 0.63, 0.66)  # #4BA0A8
-            pdf.setFont("Helvetica-Bold", 16)
-            pdf.drawCentredString(width / 2, height - 40, "FICHE MÉDICALE")
-            pdf.setFont("Helvetica", 10)
-            pdf.drawCentredString(width / 2, height - 60, "République Algérienne Démocratique et Populaire")
-            pdf.drawCentredString(width / 2, height - 75, "École Nationale Supérieure d'Informatique")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.setLineWidth(2)
-            pdf.line(50, height - 80, width - 50, height - 80)
-
-            # Personal Info Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 100, "Informations Personnelles")
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 240, width - 100, 130, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 120
-            personal_fields = [
-                ("Nom", "nom"), ("Prénom", "prenom"), ("Date de naissance", "date_naissance"),
-                ("Lieu de naissance", "lieu_naissance"), ("Adresse", "adresse"),
-                ("Numéro de téléphone", "numero_telephone"), ("Email", "email"),
-                ("Situation familiale", "situation_familiale"), ("Admis(e)", "admission_etablissement"),
-                ("Grade", "grade"), ("N° dossier", "numero_dossier"),
-                ("Groupe sanguin", "groupe_sanguin"), ("N° sécurité sociale", "numero_securite_sociale")
-            ]
-            x_label, x_value = 60, 200
-            for label, key in personal_fields[:7]:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-            y = height - 120
-            for label, key in personal_fields[7:]:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label + 300, y, f"{label}:")
-                pdf.drawString(x_value + 300, y, str(value))
-                y -= 15
-
-            # Biometric Data Section
-            pdf.setFillColorRGB(0.18, 0.31, 0.47)  # #2E5077
-            pdf.setFont("Helvetica-Bold", 12)
-            pdf.drawString(50, height - 260, "Données Biométriques")
-            pdf.line(50, height - 265, 200, height - 265)
-            pdf.setStrokeColorRGB(0.47, 0.84, 0.75)  # #79D7BE
-            pdf.rect(50, height - 340, width - 100, 70, stroke=1, fill=0)
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.setFont("Helvetica", 10)
-            y = height - 280
-            biometric_fields = [
-                ("Taille (cm)", "taille"), ("Poids (kg)", "poids"),
-                ("Fréquence cardiaque (bpm)", "frequence_cardiaque"), ("Pression artérielle", "pression_arterielle")
-            ]
-            for label, key in biometric_fields:
-                value = serializer.data.get(key, "N/A")
-                pdf.drawString(x_label, y, f"{label}:")
-                pdf.drawString(x_value, y, str(value))
-                y -= 15
-
-            pdf.showPage()
-            pdf.save()
-            pdf_data = buffer.getvalue()
-            buffer.close()
-
-            # Update or create PDF
-            if dossier.dossier_documents.exists():
-                document = dossier.dossier_documents.first()
-                document.file.save(document.title, ContentFile(pdf_data))
-            else:
-                document = Document(
-                    title=f"Dossier_{dossier.nom}_{dossier.prenom}_{dossier.numero_dossier}.pdf",
-                    dossier_medical=dossier
-                )
-                document.file.save(document.title, ContentFile(pdf_data))
-                document.save()
-                dossier.dossier_documents.add(document)
-
+            generate_medical_pdf(dossier, serializer.data, "ats", Document)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -699,14 +201,14 @@ def search_DossierMedicalEnseignant(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def search_DossierMedicalFonctionnaire(request):
-    return base_search_view(request, DossierMedicalFonctionnaire, DossierMedicalFonctionnaireSerializer)
+    return base_search_view(request, DossierMedicalFonctionnaire, DossierMedicalAtsSerializer)
 
 # Consulter dossier médical
 def get_dossier_model(user):
     for model, serializer_class in [
         (DossierMedicalEtudiant, DossierMedicalEtudiantSerializer),
         (DossierMedicalEnseignant, DossierMedicalEnseignantSerializer),
-        (DossierMedicalFonctionnaire, DossierMedicalFonctionnaireSerializer),
+        (DossierMedicalFonctionnaire, DossierMedicalAtsSerializer),
     ]:
         if model.objects.filter(user=user).exists():
             return model, serializer_class
@@ -738,7 +240,7 @@ def consulter_dossier_medical(request, dossier_id=None):
             elif model_found == DossierMedicalEnseignant:
                 serializer = DossierMedicalEnseignantSerializer(dossier)
             else:
-                serializer = DossierMedicalFonctionnaireSerializer(dossier)
+                serializer = DossierMedicalAtsSerializer(dossier)
             return Response(serializer.data)
         else:
             result = []
@@ -747,7 +249,7 @@ def consulter_dossier_medical(request, dossier_id=None):
             enseignants = DossierMedicalEnseignant.objects.filter(is_archived=False).order_by("-id")
             result.extend(DossierMedicalEnseignantSerializer(enseignants, many=True).data)
             fonctionnaires = DossierMedicalFonctionnaire.objects.filter(is_archived=False).order_by("-id")
-            result.extend(DossierMedicalFonctionnaireSerializer(fonctionnaires, many=True).data)
+            result.extend(DossierMedicalAtsSerializer(fonctionnaires, many=True).data)
             result.sort(key=lambda x: x["id"], reverse=True)
             return Response(result)
     elif user.role == "PATIENT":
@@ -767,7 +269,7 @@ def consulter_dossier_medical(request, dossier_id=None):
             elif isinstance(dossier, DossierMedicalEnseignant):
                 serializer = DossierMedicalEnseignantSerializer(dossier)
             else:
-                serializer = DossierMedicalFonctionnaireSerializer(dossier)
+                serializer = DossierMedicalAtsSerializer(dossier)
             return Response(serializer.data)
         else:
             if not model:
@@ -810,32 +312,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class GenerateMedicalFormPDF(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        data = request.data
-        if not data:
-            return Response({"error": "Form data is missing!"}, status=400)
-        buffer = BytesIO()
-        pdf = canvas.Canvas(buffer)
-        pdf.drawString(100, 800, f"Patient Name: {data.get('name', 'N/A')}")
-        pdf.drawString(100, 780, f"Patient Age: {data.get('age', 'N/A')}")
-        pdf.drawString(100, 760, f"Medical History: {data.get('medical_history', 'N/A')}")
-        pdf.drawString(100, 740, f"Current Symptoms: {data.get('current_symptoms', 'N/A')}")
-        pdf.drawString(100, 720, f"Doctor's Notes: {data.get('doctors_notes', 'N/A')}")
-        pdf.showPage()
-        pdf.save()
-        pdf_data = buffer.getvalue()
-        buffer.close()
-        document = Document()
-        document.title = f"Medical Form - {data.get('name', 'Unknown')}"
-        document.file.save("medical_form.pdf", ContentFile(pdf_data))
-        document.save()
-        response = HttpResponse(pdf_data, content_type="application/pdf")
-        response["Content-Disposition"] = 'inline; filename="medical_form.pdf"'
-        return response
 
 class DownloadMedicalForm(APIView):
     def get(self, request, document_id):

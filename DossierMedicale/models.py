@@ -68,7 +68,7 @@ class DossierMedical(models.Model):
     frequence_cardiaque = models.FloatField(null=True, blank=True)
     pression_arterielle = models.CharField(max_length=20, null=True, blank=True)
 
-    numero_dossier = models.CharField(max_length=50, unique=True)
+    numero_dossier = models.CharField(max_length=50, unique=True, blank=True)
 
     groupe_sanguin = models.CharField(
         max_length=3,
@@ -93,23 +93,23 @@ class DossierMedical(models.Model):
     interventions_chirurgicales = models.TextField(null=True, blank=True)
     reactions_allergiques = models.TextField(null=True, blank=True)
 
-    def __str__(self):
-        return f"Dossier médical de {self.nom} {self.prenom}"
-
     def save(self, *args, **kwargs):
+        if not self.numero_dossier:  # Only generate if not already set
+            last_dossier = DossierMedical.objects.order_by('-id').first()
+            last_num = int(last_dossier.numero_dossier[3:]) if last_dossier and last_dossier.numero_dossier.startswith("DOS") else 0
+            self.numero_dossier = f"DOS{last_num + 1:03d}"  # e.g., DOS001, DOS002
         if not self.fumeur:
             self.nombre_cigarettes = None
-
         if not self.chiqueur:
             self.nombre_boites_chique = None
-
         if not self.prise_autre:
             self.nombre_boites_autre = None
-
         if not self.ancien_fumeur:
             self.nombre_boites_fumeur = None
-
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Dossier médical de {self.nom} {self.prenom}"
 
 
 class Document(models.Model):
