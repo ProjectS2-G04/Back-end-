@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "users",
     "DossierMedicale",
+    "notifications",
+    "rendez_vous",
     "django_extensions",
     "rest_framework_simplejwt",
 ]
