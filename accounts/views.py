@@ -1,6 +1,6 @@
 import json
 import logging
-
+from django.contrib.auth.models import Group
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import check_password
@@ -41,6 +41,9 @@ logger = logging.getLogger(__name__)
 
 
 class RegisterView(APIView):
+    def ajouter_utilisateur_au_groupe(self, user, group_name):
+        group, created = Group.objects.get_or_create(name=group_name)
+        user.groups.add(group)
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -54,16 +57,9 @@ class RegisterView(APIView):
             user.save()
 
             try:
-                group_map = {
-                    "PATIENT": "Patient",
-                    "DOCTOR": "Médecin",  # Align with users app
-                    "ASSISTANT": "Assistant Médecin",
-                    "ADMIN": "Admin",
-                    "DIRECTOR": "Directeur",
-                }
-                group_name = group_map.get(user.role, "Patient")
-                add_user_to_group(user.email, group_name)
-                logger.info(f"Added {user.email} to {group_name} group")
+                self.ajouter_utilisateur_au_groupe(user,"Patient" )
+        
+                logger.info(f"Added {user.email} to Patient group")
             except Exception as e:
                 logger.error(f"Failed to add {user.email} to group: {str(e)}")
 
