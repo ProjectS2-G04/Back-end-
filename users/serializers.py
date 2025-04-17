@@ -196,7 +196,7 @@ class RemoveUserFromGroupSerializer(serializers.Serializer):
 class MembersSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email']
+        fields = ['id', 'first_name', 'last_name', 'email' , "sub_role"]
 
 class GroupSerializer(serializers.ModelSerializer):
 
