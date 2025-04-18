@@ -10,7 +10,7 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
-        extra_fields.pop("username", None)  
+        extra_fields.pop("username", None)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -23,9 +23,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    username = None  
+    username = None
     email = models.EmailField(unique=True)
-    
+
     ROLES = (
         ("ADMIN", "Administrateur"),
         ("DOCTOR", "Médecin"),
@@ -64,8 +64,8 @@ class User(AbstractUser):
         related_query_name="user",
     )
 
-    USERNAME_FIELD = "email"  
-    REQUIRED_FIELDS = []  
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
 
     objects = UserManager()
 

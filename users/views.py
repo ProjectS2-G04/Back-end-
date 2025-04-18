@@ -1,25 +1,18 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from .models import Profile
-from .serializers import UserProfileSerializer
+# users/views.py
 from rest_framework.generics import RetrieveUpdateAPIView
-
-from django.contrib.auth.models import Group
-from rest_framework import viewsets ,generics
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import action
-
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import *
-
-
-
-
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import Group
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from .models import Profile
+from .serializers import GroupSerializer, MembersSerializer, RegisterAdminSerializer, UserProfileSerializer
+from accounts.models import User
 
 class RegisterAdminView(generics.CreateAPIView):
     serializer_class = RegisterAdminSerializer
@@ -31,36 +24,45 @@ class RegisterAdminView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()  # ✅ Save user first
+        user = serializer.save()  # Save user with mapped role
 
-        role = serializer.validated_data["role"]  # ✅ Use validated data
+        # Use the original frontend role for group assignment
+        frontend_role = request.data.get("role")  # MEDECIN, ASSISTANT_MEDECIN, etc.
         email = serializer.validated_data["email"]
 
-        # ✅ Add user to the correct group
-        if role == "DIRECTEUR":
-            self.ajouter_utilisateur_au_groupe(user, "Directeur")
-        elif role == "ASSISTANT_MEDECIN":
-            self.ajouter_utilisateur_au_groupe(user, "Assistant Médecin")
-        elif role == "MEDECIN":
-            self.ajouter_utilisateur_au_groupe(user, "Médecin")
-        elif role == "PATIENT":
-            self.ajouter_utilisateur_au_groupe(user, "Patient")    
+        # Map frontend role to group name
+        group_map = {
+            "MEDECIN": "Médecin",
+            "ASSISTANT_MEDECIN": "Assistant Médecin",
+            "DIRECTEUR": "Directeur",
+            "PATIENT": "Patient"
+        }
+        group_name = group_map.get(frontend_role)
+        if group_name:
+            self.ajouter_utilisateur_au_groupe(user, group_name)
+
+        # Send email verification
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        verification_url = f"http://localhost:5173/verify-email/{uid}/{token}/"
+        subject = "Verify your email"
+        message = f"Click the link below to verify your email:\n{verification_url}"
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
         return Response(
             {
-                "user": {"email": email, "role": role},
-                "message": "Utilisateur créé avec succès.",
+                "user": {"email": email, "role": frontend_role},
+                "message": "Utilisateur créé avec succès. Veuillez vérifier votre email pour activer votre compte.",
             },
             status=status.HTTP_201_CREATED,
         )
 
+# Rest of the views remain unchanged
 class GroupMembersAPIView(APIView):
-
     def get(self, request):
         groups = Group.objects.all()
-        serializer = GroupSerializer(groups, many=True)  # Correct serializer usage
+        serializer = GroupSerializer(groups, many=True)
         return Response({"groups": serializer.data}, status=status.HTTP_200_OK)
-    
 
 class ListGroupAPIView(APIView):
     group_name = None 
@@ -76,35 +78,31 @@ class ListGroupAPIView(APIView):
             )
         except Group.DoesNotExist:
             return Response(
-                {"group": self.group_name, "members": []},  # Return empty list
+                {"group": self.group_name, "members": []},
                 status=status.HTTP_200_OK
             )
+
 class ListAdminAPIView(ListGroupAPIView):
     group_name = "Admin"
-
 
 class ListMedecinAPIView(ListGroupAPIView):
     group_name = "Médecin"
 
 class ListAssisstantAPIView(ListGroupAPIView):     
-        group_name = "Assistant Médecin"
-
+    group_name = "Assistant Médecin"
 
 class ListDirecteurAPIView(ListGroupAPIView): 
-        group_name = "Directeur"
-       
+    group_name = "Directeur"
 
 class ListPatientAPIView(ListGroupAPIView):        
-        group_name = "Patient"
-        
-
-
+    group_name = "Patient"
+    permission_classes = []
 
 class UpdateUserProfileView(RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-     user = self.request.user
-     profile, created = Profile.objects.get_or_create(user=user)  # Create profile if missing
-     return profile
+        user = self.request.user
+        profile, created = Profile.objects.get_or_create(user=user)
+        return profile
