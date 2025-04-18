@@ -17,4 +17,5 @@ class DemandeRendezVousSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DemandeRendezVous
-        fields = ['id', 'patient_id', 'nom', 'prenom', 'motif']
+        fields = '__all__'
+        read_only_fields = ['statut', 'patient', 'created_at']

@@ -1,12 +1,15 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import  path
 from .views import *
+from . import views
 
 urlpatterns = [
-    #créer un rendez-vous pour un patient spécifique
     path("create/<int:patient_id>/", CreateRendezVousView.as_view(), name="create-rendezvous"),
     path('demandes/rdv/', demandes_rendez_vous, name='demandes_rdv'),
     path('demandes/annulation/', demandes_annulation, name='demandes_annulation'),
+    path('demande/create/', views.CreateDemandeRendezVousView.as_view(), name='create-demande'),
+    path('demande/<int:demande_id>/confirmer/', views.confirmer_demande, name='confirmer-demande'),
+    path('demande/<int:demande_id>/annuler/', views.annuler_demande, name='annuler-demande'),
+    path('demande/<int:demande_id>/reporter/', views.reporter_demande, name='reporter-demande'),
 ]
+
+
