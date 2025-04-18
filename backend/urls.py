@@ -25,7 +25,7 @@ urlpatterns = [
     path("api/accounts/", include("accounts.urls")),
     path('api/', include('users.urls')),
     path('api/dossier-medicale/', include('DossierMedicale.urls')),
-   
+    path('api/rendez_vous/', include('rendez_vous.urls')),
 ]
 
 if settings.DEBUG:
