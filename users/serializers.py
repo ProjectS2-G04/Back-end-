@@ -7,51 +7,59 @@ from accounts.models import User
 
 
 
-class RegisterAdminSerializer(serializers.ModelSerializer):
-    
+# users/serializers.py
+from rest_framework import serializers
+from accounts.models import User
 
-    password = serializers.CharField(write_only=True)
+class RegisterAdminSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
     role = serializers.ChoiceField(
-        choices=['DIRECTEUR', 'ASSISTANT_MEDECIN', 'MEDECIN' ,"PATIENT"], required=True
+        choices=['MEDECIN', 'ASSISTANT_MEDECIN', 'DIRECTEUR', 'PATIENT'], required=True
     )
 
     class Meta:
         model = User
         fields = ["email", "password", "first_name", "last_name", "role"]
 
+    # Map frontend roles to backend User model roles
+    ROLE_MAPPING = {
+        'MEDECIN': 'DOCTOR',
+        'ASSISTANT_MEDECIN': 'ASSISTANT',
+        'DIRECTEUR': 'DIRECTOR',
+        'PATIENT': 'PATIENT'
+    }
+
     def validate(self, data):
         email = data.get("email")
         role = data.get("role")
 
+        # Validate email domain
         if not email.endswith("@esi-sba.dz"):
             raise serializers.ValidationError(
-                {
-                    "email": "Seules les adresses email avec le domaine @esi-sba.dz sont autorisées."
-                }
+                {"email": "Seules les adresses email avec le domaine @esi-sba.dz sont autorisées."}
             )
 
-        if role not in ['DIRECTEUR', 'ASSISTANT_MEDECIN', 'MEDECIN' ,'PATIENT']:
+        # Validate role and map to backend role
+        if role not in ['MEDECIN', 'ASSISTANT_MEDECIN', 'DIRECTEUR', 'PATIENT']:
             raise serializers.ValidationError(
-                {
-                    "role": "Le sous-role doit être 'MEDECIN', 'ASSISTANT_MEDECIN' ou DIRECTEUR'  ."
-                }
+                {"role": "Le rôle doit être 'MEDECIN', 'ASSISTANT_MEDECIN', 'DIRECTEUR' ou 'PATIENT'."}
             )
-        
-             
 
+        # Map the role to the backend value for storage
+        data['role'] = self.ROLE_MAPPING[role]
         return data
 
     def create(self, validated_data):
-
         user = User.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
             first_name=validated_data["first_name"],
             last_name=validated_data["last_name"],
-            role=validated_data["role"],
+            role=validated_data["role"],  # Use mapped role (DOCTOR, ASSISTANT, etc.)
+            is_active=False,  # Require email verification
+            email_verified=False
         )
-        return user  
-
+        return user
 
 
 

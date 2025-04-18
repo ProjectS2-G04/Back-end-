@@ -1,6 +1,8 @@
 import json
 import logging
 from django.contrib.auth.models import Group
+from django.db.models import Q
+
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import check_password
@@ -259,9 +261,15 @@ class UserListView(generics.ListAPIView):
 
     def get_queryset(self):
         role = self.request.query_params.get("role")
+        queryset = super().get_queryset()  # Call super().get_queryset()
         if role:
-            return self.queryset.filter(role=role.upper())
-        return self.queryset
+            if role.upper() == "PATIENT":
+                return queryset.filter(
+                    Q(role="PATIENT") |
+                    Q(role="DIRECTOR", sub_role__in=["STUDENT", "TEACHER", "ATS"])
+                )
+            return queryset.filter(role=role.upper())
+        return queryset
 
 
 class UserDeleteView(generics.DestroyAPIView):

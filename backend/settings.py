@@ -139,7 +139,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASS")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),  # Access token expiration time
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=45),  # Access token expiration time
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  # Refresh token expiration time
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
