@@ -106,7 +106,21 @@ class DossierMedical(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.numero_dossier:  # Only generate if not already set
-            self.numero_dossier = f"DOS-{uuid.uuid4().hex[:8].upper()}"  # e.g., DOS-1A2B3C4D
+            last_dossier = DossierMedical.objects.order_by("-id").first()
+            last_num = 0  # Default to 0 if no valid dossier exists
+            if (
+                last_dossier
+                and last_dossier.numero_dossier
+                and last_dossier.numero_dossier.startswith("DOS")
+            ):
+                try:
+                    last_num = int(last_dossier.numero_dossier[3:])
+                except ValueError:
+                    print(
+                        f"Invalid numero_dossier format: {last_dossier.numero_dossier}"
+                    )
+                    last_num = 0
+            self.numero_dossier = f"DOS{last_num + 1:03d}"  # e.g., DOS001
 
         # Nullify fields based on conditions
         if not self.fumeur:
