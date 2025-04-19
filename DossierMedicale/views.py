@@ -235,21 +235,23 @@ def consulter_dossier_medical(request, dossier_id=None):
                     {"error": "Dossier archivé", "message": "Ce dossier existe mais a été archivé", "dossier_id": dossier_id, "nom_complet": f"{dossier.nom} {dossier.prenom}"},
                     status=status.HTTP_403_FORBIDDEN
                 )
+            context = {"request": request}  # Add context for single dossier
             if model_found == DossierMedicalEtudiant:
-                serializer = DossierMedicalEtudiantSerializer(dossier)
+                serializer = DossierMedicalEtudiantSerializer(dossier, context=context)
             elif model_found == DossierMedicalEnseignant:
-                serializer = DossierMedicalEnseignantSerializer(dossier)
+                serializer = DossierMedicalEnseignantSerializer(dossier, context=context)
             else:
-                serializer = DossierMedicalAtsSerializer(dossier)
+                serializer = DossierMedicalAtsSerializer(dossier, context=context)
             return Response(serializer.data)
         else:
             result = []
+            context = {"request": request}  # Add context for list of dossiers
             etudiants = DossierMedicalEtudiant.objects.filter(is_archived=False).order_by("-id")
-            result.extend(DossierMedicalEtudiantSerializer(etudiants, many=True).data)
+            result.extend(DossierMedicalEtudiantSerializer(etudiants, many=True, context=context).data)
             enseignants = DossierMedicalEnseignant.objects.filter(is_archived=False).order_by("-id")
-            result.extend(DossierMedicalEnseignantSerializer(enseignants, many=True).data)
+            result.extend(DossierMedicalEnseignantSerializer(enseignants, many=True, context=context).data)
             fonctionnaires = DossierMedicalFonctionnaire.objects.filter(is_archived=False).order_by("-id")
-            result.extend(DossierMedicalAtsSerializer(fonctionnaires, many=True).data)
+            result.extend(DossierMedicalAtsSerializer(fonctionnaires, many=True, context=context).data)
             result.sort(key=lambda x: x["id"], reverse=True)
             return Response(result)
     elif user.role == "PATIENT":
@@ -264,12 +266,13 @@ def consulter_dossier_medical(request, dossier_id=None):
                 return Response({"error": "Vous n'avez pas accès à ce dossier."}, status=status.HTTP_404_NOT_FOUND)
             if dossier.is_archived:
                 return Response({"error": "Votre dossier médical a été archivé."}, status=status.HTTP_403_FORBIDDEN)
+            context = {"request": request}  # Add context for patient dossier
             if isinstance(dossier, DossierMedicalEtudiant):
-                serializer = DossierMedicalEtudiantSerializer(dossier)
+                serializer = DossierMedicalEtudiantSerializer(dossier, context=context)
             elif isinstance(dossier, DossierMedicalEnseignant):
-                serializer = DossierMedicalEnseignantSerializer(dossier)
+                serializer = DossierMedicalEnseignantSerializer(dossier, context=context)
             else:
-                serializer = DossierMedicalAtsSerializer(dossier)
+                serializer = DossierMedicalAtsSerializer(dossier, context=context)
             return Response(serializer.data)
         else:
             if not model:
@@ -279,7 +282,8 @@ def consulter_dossier_medical(request, dossier_id=None):
                 return Response({"error": "Votre dossier médical n'a pas encore été créé."}, status=status.HTTP_404_NOT_FOUND)
             if dossier.is_archived:
                 return Response({"error": "Votre dossier médical a été archivé."}, status=status.HTTP_404_NOT_FOUND)
-            serializer = serializer_class(dossier)
+            context = {"request": request}  # Add context for patient dossier
+            serializer = serializer_class(dossier, context=context)
             return Response(serializer.data)
     elif user.role == "ADMIN":
         if dossier_id:

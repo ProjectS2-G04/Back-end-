@@ -1,3 +1,4 @@
+from datetime import timezone
 from django.db import models
 from django.core.exceptions import ValidationError
 from accounts.models import User
@@ -13,6 +14,7 @@ class RendezVous(models.Model):
     date = models.DateField()
     heure_debut = models.TimeField()
     heure_fin = models.TimeField()
+    description = models.TextField(blank=True, null=True) 
     patient = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

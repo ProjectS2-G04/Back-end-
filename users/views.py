@@ -13,6 +13,7 @@ from django.contrib.auth.tokens import default_token_generator
 from .models import Profile
 from .serializers import GroupSerializer, MembersSerializer, RegisterAdminSerializer, UserProfileSerializer
 from accounts.models import User
+from rest_framework.generics import RetrieveAPIView
 
 class RegisterAdminView(generics.CreateAPIView):
     serializer_class = RegisterAdminSerializer
@@ -98,7 +99,7 @@ class ListPatientAPIView(ListGroupAPIView):
     group_name = "Patient"
     permission_classes = []
 
-class UpdateUserProfileView(RetrieveUpdateAPIView):
+class UpdateUserProfileView(RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 

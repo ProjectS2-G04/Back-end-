@@ -13,3 +13,22 @@ def create_profile(sender, instance, created, **kwargs):
 def save_profile(sender, instance, **kwargs):
     """Save the profile whenever the user is updated."""
     instance.profile.save()
+
+
+
+
+""""class UserProfileSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source='user.first_name', required=False)
+    last_name = serializers.CharField(source='user.last_name', required=False)
+    image = serializers.ImageField(required=False)
+
+    class Meta:
+        model = Profile
+        fields = ['first_name', 'last_name', 'image']    class UpdateUserProfileView(RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        profile, created = Profile.objects.get_or_create(user=user)
+        return profile"""    

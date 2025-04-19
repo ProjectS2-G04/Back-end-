@@ -37,8 +37,8 @@ class DossierMedicalSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if hasattr(obj, "dossier_documents") and obj.dossier_documents.exists():
             document = obj.dossier_documents.first()
-            if document.file:
-                return request.build_absolute_uri(document.file.url)
+            if document.file and hasattr(document.file, "url"):
+                return request.build_absolute_uri(document.file.url) if request else None
         return None
 
 

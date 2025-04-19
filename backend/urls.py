@@ -25,10 +25,12 @@ urlpatterns = [
     path("api/accounts/", include("accounts.urls")),
     path('api/', include('users.urls')),
     path('api/dossier-medicale/', include('DossierMedicale.urls')),
-    path('', include('rendez_vous.urls')),
+  
    
+    path("api/", include("users.urls")),
+    path("api/dossier-medicale/", include("DossierMedicale.urls")),
+    path("api/rendez-vous/", include("rendez_vous.urls")),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    

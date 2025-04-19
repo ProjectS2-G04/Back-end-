@@ -213,7 +213,7 @@ class GroupSerializer(serializers.ModelSerializer):
          fields = ['id' , "name"]
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserUpadateProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source='user.first_name' ,required=False)
     last_name = serializers.CharField(source='user.last_name' , required=False)
     image = serializers.ImageField(required=False)
@@ -234,3 +234,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.image = validated_data.get('image', instance.image)
         instance.save()
         return instance
+    
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source='user.first_name', required=False)
+    last_name = serializers.CharField(source='user.last_name', required=False)
+    image = serializers.ImageField(required=False)
+
+    class Meta:
+        model = Profile
+        fields = ['first_name', 'last_name', 'image']    
