@@ -70,15 +70,15 @@ from accounts.models import User
 from rest_framework import generics, permissions, status
 from datetime import datetime
 
-#create rendezvous http://127.0.0.1:8000/api/rendez_vous/create/id /
+
 class CreateRendezVousView(APIView):
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, patient_id=None):
         if not patient_id:
             return Response(
                 {"error": "L'ID du patient est requis."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
@@ -86,56 +86,56 @@ class CreateRendezVousView(APIView):
         except User.DoesNotExist:
             return Response(
                 {"error": "Le patient spécifié n'existe pas ou n'est pas valide."},
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         serializer = RendezVousSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Vérifier le rôle de l'utilisateur authentifié
                 if request.user.role in ["MEDECIN", "DOCTOR"]:
-                    serializer.validated_data['medecin'] = request.user
-                    assistant = User.objects.filter(role__in=["ASSISTANT_MEDECIN", "ASSISTANT"]).first()
-                    serializer.validated_data['assistant'] = assistant
+                    serializer.validated_data["medecin"] = request.user
+                    assistant = User.objects.filter(
+                        role__in=["ASSISTANT_MEDECIN", "ASSISTANT"]
+                    ).first()
+                    serializer.validated_data["assistant"] = assistant
 
                 elif request.user.role in ["ASSISTANT_MEDECIN", "ASSISTANT"]:
-                    serializer.validated_data['assistant'] = request.user
-                    medecin = User.objects.filter(role__in=["MEDECIN", "DOCTOR"]).first()
-                    serializer.validated_data['medecin'] = medecin
+                    serializer.validated_data["assistant"] = request.user
+                    medecin = User.objects.filter(
+                        role__in=["MEDECIN", "DOCTOR"]
+                    ).first()
+                    serializer.validated_data["medecin"] = medecin
 
                 else:
                     return Response(
                         {"error": "Vous n'avez pas les permissions nécessaires."},
-                        status=status.HTTP_403_FORBIDDEN
+                        status=status.HTTP_403_FORBIDDEN,
                     )
-                    
-                serializer.validated_data['patient'] = patient
+
+                serializer.validated_data["patient"] = patient
 
                 serializer.save()
 
-
                 return Response(status=status.HTTP_201_CREATED)
-                # return Response({"message": "Rendez-vous créé avec succès."}, status=status.HTTP_201_CREATED)
 
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Retourner les erreurs de validation si le serializer n'est pas valide
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# consulter la listes des demandes
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def demandes_rendez_vous(request):
-    demandes = DemandeRendezVous.objects.filter(type='demande_rendez_vous')
+    demandes = DemandeRendezVous.objects.filter(type="demande_rendez_vous", statut="en_attente")
     serializer = DemandeRendezVousSerializer(demandes, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def demandes_annulation(request):
-    demandes = DemandeRendezVous.objects.filter(type='annulation_rendez_vous')
+    demandes = DemandeRendezVous.objects.filter(type="annulation_rendez_vous")
     serializer = DemandeRendezVousSerializer(demandes, many=True)
     return Response(serializer.data)
 
@@ -223,8 +223,8 @@ def reporter_demande(request, demande_id):
         return Response(
             {"error": "La nouvelle date est requise."},
             status=status.HTTP_400_BAD_REQUEST,
-        )
-        
+        ) 
+
     try:
         datetime.strptime(nouvelle_date, "%Y-%m-%d")
     except ValueError:
@@ -246,6 +246,7 @@ def reporter_demande(request, demande_id):
     return Response(
         {"success": f"Demande reportée à {nouvelle_date}."}, status=status.HTTP_200_OK
     )
+
 
 def is_medecin_or_assistant(user):
     return user.role in ["DOCTOR", "ASSISTANT"]
