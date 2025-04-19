@@ -65,7 +65,7 @@ class CreateRendezVousView(APIView):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def demandes_rendez_vous(request):
-    demandes = DemandeRendezVous.objects.filter(type="demande_rendez_vous")
+    demandes = DemandeRendezVous.objects.filter(type="demande_rendez_vous", statut="en_attente")
     serializer = DemandeRendezVousSerializer(demandes, many=True)
     return Response(serializer.data)
 
@@ -161,7 +161,7 @@ def reporter_demande(request, demande_id):
         return Response(
             {"error": "La nouvelle date est requise."},
             status=status.HTTP_400_BAD_REQUEST,
-        )
+        ) 
 
     try:
         datetime.strptime(nouvelle_date, "%Y-%m-%d")
