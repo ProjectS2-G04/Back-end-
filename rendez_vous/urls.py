@@ -11,7 +11,7 @@ path ("list/<int:id>/",OrdonnanceDetailView.as_view() ,  name='ordonnance'),
  path("my_ordonnances/", PatientOrdonnanceListView.as_view(), name="my_ordonnances"),
 
 
-    path("create/<int:patient_id>/", CreateRendezVousView.as_view(), name="create-rendezvous"),
+    path("createrenderVous/<int:patient_id>/", CreateRendezVousView.as_view(), name="create-rendezvous"),
     path('demandes/rdv/', demandes_rendez_vous, name='demandes_rdv'),
     path('demandes/annulation/', demandes_annulation, name='demandes_annulation'),
     path('demande/create/', views.CreateDemandeRendezVousView.as_view(), name='create-demande'),

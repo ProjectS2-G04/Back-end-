@@ -89,7 +89,7 @@ class CreateRendezVousView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = RendezVousSerializer(data=request.data)
+        serializer = RendezVousCreateSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 if request.user.role in ["MEDECIN", "DOCTOR"]:
