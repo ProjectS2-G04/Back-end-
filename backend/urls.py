@@ -29,6 +29,7 @@ urlpatterns = [
    
  
     path("api/rendez-vous/", include("rendez_vous.urls")),
+    
 ]
 
 if settings.DEBUG:
