@@ -212,7 +212,6 @@ class SupprimerPlageEtAnnulerRDV(APIView):
         try:
             plage = PlageHoraire.objects.get(date=date, heure_debut=heure_debut)
 
-            # Annuler le rendez-vous lié s'il existe
             if plage.rendez_vous:
                 plage.rendez_vous.statut = "annule"
                 plage.rendez_vous.save()
@@ -278,6 +277,28 @@ def annuler_demande(request, demande_id):
         {"success": "Demande annulée avec succès."}, status=status.HTTP_200_OK
     )
 
+@api_view(["POST"])
+@permission_classes([permissions.IsAuthenticated])
+def annuler_demande_patient(request, demande_id):
+    if not is_patient(request.user):
+        return Response(
+            {"error": "Seuls les patinets peuvent envoyer demande d'annulation du rdv."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    try:
+        demande = DemandeRendezVous.objects.get(id=demande_id)
+    except DemandeRendezVous.DoesNotExist:
+        return Response(
+            {"error": "Demande introuvable."}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    demande.type = "annulation_rendez_vous"
+    demande.save()
+    return Response(
+        {"success": "Demande annulée avec succès."}, status=status.HTTP_200_OK
+    )
+
 
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
@@ -320,3 +341,6 @@ def reporter_demande(request, demande_id):
 
 def is_medecin_or_assistant(user):
     return user.role in ["DOCTOR", "ASSISTANT"]
+
+def is_patient(user):
+    return user.role in ["PATIENT"]

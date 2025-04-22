@@ -58,6 +58,11 @@ urlpatterns = [
         name="annuler-demande",
     ),
     path(
+        "demande/<int:demande_id>/annuler-demande-patient/",
+        views.annuler_demande_patient,
+        name="annuler-demande-patient",
+    ),
+    path(
         "demande/<int:demande_id>/reporter/",
         views.reporter_demande,
         name="reporter-demande",
