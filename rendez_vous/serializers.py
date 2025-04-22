@@ -1,11 +1,11 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from .models import *
 
 class OrdonnanceSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ordonnance
         fields = ['id', 'date']
-
 
 class MedicamentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,14 +19,7 @@ class OrdonnanceDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ordonnance
-        fields = ['id', 'age', 'date', 'patient_prenom', 'patient_nom', 'medicaments']
-
-
-
-
-
-from django.contrib.auth import get_user_model
- 
+        fields = ['id', 'age', 'date', 'patient_prenom', 'patient_nom', 'medicaments'] 
 
 class RendezVousSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,3 +47,8 @@ class RendezVousCreateSerializer(serializers.ModelSerializer):
         model = RendezVous
         fields = "__all__"
         read_only_fields = ['patient', 'medecin', 'assistant', 'created_at', 'statut']
+
+class PlageHoraireSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlageHoraire
+        fields = ['id', 'date', 'heure_debut', 'heure_fin', 'statut', 'rendez_vous']

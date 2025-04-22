@@ -9,7 +9,7 @@ today_date = dt_date.today()
 from .serializers import *
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import RetrieveAPIView
- 
+
 class OrdonnanceDetailView(RetrieveAPIView):
     queryset = Ordonnance.objects.all()
     serializer_class = OrdonnanceDetailSerializer
@@ -40,11 +40,12 @@ class OrdonnanceCreateView(APIView):
 
         ordonnance = Ordonnance.objects.create(
             patient=patient,
-            medecin=request.user,  
+            medecin=request.user, 
             age=age,
             date=today_date
         )
 
+        # Now create the medicaments
         medicaments_data = request.data.get("medicaments", [])
         for medicament in medicaments_data:
             Medicament.objects.create(
@@ -143,7 +144,7 @@ class CreateDemandeRendezVousView(generics.CreateAPIView):
     queryset = DemandeRendezVous.objects.all()
     serializer_class = DemandeRendezVousSerializer
     permission_classes = [permissions.IsAuthenticated]
-  
+
     def perform_create(self, serializer):
         serializer.save(patient=self.request.user)
 
@@ -157,6 +158,34 @@ class CreateDemandeRendezVousView(generics.CreateAPIView):
             )
         return super().create(request, *args, **kwargs)
 
+class PlageHoraireListView(generics.ListAPIView):
+    serializer_class = PlageHoraireSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        start = self.request.query_params.get('start')
+        end = self.request.query_params.get('end')
+
+        queryset = PlageHoraire.objects.all()
+
+        if start and end:
+            queryset = queryset.filter(date__range=[start, end])
+
+        if user.role in ['MEDECIN', 'DOCTOR']:
+            return queryset.filter(rendez_vous__medecin=user)
+
+        elif user.role in ['ASSISTANT_MEDECIN', 'ASSISTANT']:
+            return queryset.filter(rendez_vous__assistant=user)
+
+        elif user.role == 'PATIENT':
+            return queryset.filter(rendez_vous__patient=user)
+
+        return PlageHoraire.objects.none()
+
+
+
+    
 
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
@@ -245,7 +274,6 @@ def reporter_demande(request, demande_id):
     return Response(
         {"success": f"Demande reportée à {nouvelle_date}."}, status=status.HTTP_200_OK
     )
-
 
 def is_medecin_or_assistant(user):
     return user.role in ["DOCTOR", "ASSISTANT"]
