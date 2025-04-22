@@ -9,7 +9,7 @@ today_date = dt_date.today()
 from .serializers import *
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import RetrieveAPIView
-
+ 
 class OrdonnanceDetailView(RetrieveAPIView):
     queryset = Ordonnance.objects.all()
     serializer_class = OrdonnanceDetailSerializer
@@ -40,12 +40,11 @@ class OrdonnanceCreateView(APIView):
 
         ordonnance = Ordonnance.objects.create(
             patient=patient,
-            medecin=request.user,  # the authenticated doctor
+            medecin=request.user,  
             age=age,
             date=today_date
         )
 
-        # Now create the medicaments
         medicaments_data = request.data.get("medicaments", [])
         for medicament in medicaments_data:
             Medicament.objects.create(
@@ -144,7 +143,7 @@ class CreateDemandeRendezVousView(generics.CreateAPIView):
     queryset = DemandeRendezVous.objects.all()
     serializer_class = DemandeRendezVousSerializer
     permission_classes = [permissions.IsAuthenticated]
-
+  
     def perform_create(self, serializer):
         serializer.save(patient=self.request.user)
 
