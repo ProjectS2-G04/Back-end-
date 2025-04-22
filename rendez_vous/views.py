@@ -224,6 +224,11 @@ class SupprimerPlageEtAnnulerRDV(APIView):
         except PlageHoraire.DoesNotExist:
             return Response({"error": "Plage non trouvée"}, status=404)
 
+class CreatePlageHoraireView(generics.CreateAPIView):
+    queryset = PlageHoraire.objects.all()
+    serializer_class = PlageHoraireSerializer
+    permission_classes = [IsAuthenticated]
+
 
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])

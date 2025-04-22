@@ -65,5 +65,6 @@ urlpatterns = [
     path("plages_horaires/", PlageHoraireListView.as_view(), name="plages-horaires"),
     path("plages_horaires/update/", UpdatePlageHoraireStatusView.as_view(), name="update-plage-horaire"),
     path("plages_horaires/delete_and_cancel/", SupprimerPlageEtAnnulerRDV.as_view(), name="delete-plage-and-cancel-rdv"),
+    path("plages_horaires/create/", CreatePlageHoraireView.as_view(), name="plage-horaire-create"),
 
 ]
