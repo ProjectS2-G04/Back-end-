@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.utils.dateparse import parse_date, parse_time
 from .models import *
 from .permissions import *
 from datetime import date as dt_date
@@ -16,16 +17,12 @@ class OrdonnanceDetailView(RetrieveAPIView):
     permission_classes = [IsAuthenticatedMedecin]
     lookup_field = 'id'
 
-
 class PatientOrdonnanceListView(ListAPIView):
     serializer_class = OrdonnanceDetailSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Only ordonnances of the connected patient
         return Ordonnance.objects.filter(patient=self.request.user)
-    
-
     
 class OrdonnanceCreateView(APIView):
     permission_classes = [IsAuthenticatedMedecin]
@@ -183,9 +180,50 @@ class PlageHoraireListView(generics.ListAPIView):
 
         return PlageHoraire.objects.none()
 
+class UpdatePlageHoraireStatusView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def patch(self, request):
+        date = request.data.get("date")
+        heure_debut = request.data.get("heure_debut")
+        statut = request.data.get("statut")
 
-    
+        if not date or not heure_debut or not statut:
+            return Response({"error": "Missing data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            plage = PlageHoraire.objects.get(date=parse_date(date), heure_debut=parse_time(heure_debut))
+            plage.statut = statut
+            plage.save()
+            return Response({"message": "PlageHoraire updated successfully"})
+        except PlageHoraire.DoesNotExist:
+            return Response({"error": "PlageHoraire not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class SupprimerPlageEtAnnulerRDV(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        date = request.data.get("date")
+        heure_debut = request.data.get("heure_debut")
+
+        if not date or not heure_debut:
+            return Response({"error": "Date et heure requises"}, status=400)
+
+        try:
+            plage = PlageHoraire.objects.get(date=date, heure_debut=heure_debut)
+
+            # Annuler le rendez-vous lié s'il existe
+            if plage.rendez_vous:
+                plage.rendez_vous.statut = "annule"
+                plage.rendez_vous.save()
+
+            plage.delete()
+
+            return Response({"message": "Plage supprimée et rendez-vous annulé"}, status=200)
+
+        except PlageHoraire.DoesNotExist:
+            return Response({"error": "Plage non trouvée"}, status=404)
+
 
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
