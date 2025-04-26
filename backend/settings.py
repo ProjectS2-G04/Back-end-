@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "DossierMedicale",
     "notifications",
     "rendez_vous",
+    "consultation",
     "django_extensions",
     "rest_framework_simplejwt",
 ]

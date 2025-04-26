@@ -6,15 +6,16 @@ from accounts.models import User
 
 class RendezVous(models.Model):
     STATUT_CHOICES = [
+        ("en-attente", "En-attente"),
         ("reserve", "Réservé"),
+        ("repote", "Reporte"),
         ("termine", "Terminé"),
         ("annule", "Annulé"),
     ]
 
-    date = models.DateField()
-    heure_debut = models.TimeField()
-    heure_fin = models.TimeField()
-    description = models.TextField(blank=True, null=True) 
+    Datetime = models.DateTimeField()
+    duree = models.TimeField()
+    motif = models.TextField(blank=True, null=True)
     patient = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -38,12 +39,8 @@ class RendezVous(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default="reserve")
 
-    def clean(self):
-        if self.heure_fin <= self.heure_debut:
-            raise ValidationError("L'heure de fin doit être après l'heure de début.")
-
     def __str__(self):
-        return f"Rendez-vous le {self.date} ({self.heure_debut}-{self.heure_fin}) - Patient: {self.patient.email}"
+        return f"Rendez-vous le {self.Datetime} - Patient: {self.patient.email}"
 
 
 class DemandeRendezVous(models.Model):
@@ -85,9 +82,9 @@ class DemandeRendezVous(models.Model):
 
 class PlageHoraire(models.Model):
     STATUT_CHOICES = [
-        ("reserve", "Réservé"), # en rouge dans notre design
-        ("termine", "Terminé"), # en vert
-        ("grise", "Grisé"), # en gris
+        ("reserve", "Réservé"),  # en rouge dans notre design
+        ("termine", "Terminé"),  # en vert
+        ("grise", "Grisé"),  # en gris
     ]
 
     date = models.DateField()
@@ -119,7 +116,9 @@ class Ordonnance(models.Model):
         limit_choices_to={"role": "DOCTOR"},
         related_name="ordonnances_medecin",
     )
-    age = models.IntegerField() # we can replace this to make it auto calculated from dossier_medical
+    age = (
+        models.IntegerField()
+    )  # we can replace this to make it auto calculated from dossier_medical
     date = models.DateField()
 
     def __str__(self):

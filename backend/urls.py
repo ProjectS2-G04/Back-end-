@@ -16,20 +16,17 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import include, path 
+from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/accounts/", include("accounts.urls")),
-    path('api/', include('users.urls')),
-    path('api/dossier-medicale/', include('DossierMedicale.urls')),
-  
-   
- 
+    path("api/", include("users.urls")),
+    path("api/dossier-medicale/", include("DossierMedicale.urls")),
     path("api/rendez-vous/", include("rendez_vous.urls")),
-    
+    path("api/consultation/", include("consultation.urls")),
 ]
 
 if settings.DEBUG:
