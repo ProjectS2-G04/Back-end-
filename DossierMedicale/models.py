@@ -171,3 +171,65 @@ class DossierMedicalFonctionnaire(DossierMedical):
     dossier_documents = models.ManyToManyField(
         Document, related_name="fonctionnaires", blank=True
     )
+
+
+
+
+class Depistage (models.Model):
+    doosier = models.OneToOneField(DossierMedical , on_delete= models.CASCADE ,null=True , blank=True)
+    evaluation_auditive = models.CharField(max_length=50, choices=[
+        ('normal', 'Normal'),
+        ('perte_auditive', 'Perte auditive'),
+        ('surdite', 'Surdité partielle/complète')
+    ])
+    utilisation_audiometre = models.BooleanField()  # Oui / Non
+    test_reponse_son = models.CharField(max_length=20, choices=[
+        ('normal', 'Normal'),
+        ('anormal', 'Anormal')
+    ])
+    remarque_audition = models.TextField(blank=True, null=True)
+
+   
+    vision_lointaine = models.CharField(max_length=20, choices=[
+        ('normale', 'Normale'),
+        ('anormale', 'Anormale')
+    ])
+    vision_proche = models.CharField(max_length=20, choices=[
+        ('normale', 'Normale'),
+        ('anormale', 'Anormale')
+    ])
+    besoin_lunettes = models.BooleanField()  # Oui / Non
+    test_snellen_effectue = models.BooleanField()  # Oui / Non
+    remarque_vision = models.TextField(blank=True, null=True)
+
+  
+    pression_oculaire = models.CharField(max_length=20, choices=[
+        ('normale', 'Normale'),
+        ('anormale', 'Anormale')
+    ])
+    examen_fond_oeil = models.CharField(max_length=20, choices=[
+        ('normal', 'Normal'),
+        ('anormal', 'Anormal')
+    ])
+    tests_ophtalmo_suppl = models.CharField(max_length=20, choices=[
+        ('necessaire', 'Nécessaire'),
+        ('non_necessaire', 'Non nécessaire')
+    ])
+    maladies_oculaires_detectees = models.TextField(blank=True, null=True)
+
+    examen_nez = models.CharField(max_length=40, choices=[
+        ('sain', 'Sain'),
+        ('inflammation', 'Inflammation'),
+        ('obstruction_chronique', 'Obstruction chronique')
+    ])
+    examen_oreille = models.CharField(max_length=40, choices=[
+        ('saine', 'Saine'),
+        ('inflammation', 'Inflammation'),
+        ('autre_probleme', 'Autre problème')
+    ])
+    examen_larynx = models.CharField(max_length=40, choices=[
+        ('normal', 'Normal'),
+        ('inflammation', 'Inflammation'),
+        ('probleme_voix', 'Problèmes de voix')
+    ])
+    remarque_orl = models.TextField(blank=True, null=True)

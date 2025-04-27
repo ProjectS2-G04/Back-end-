@@ -12,7 +12,6 @@ class RendezVous(models.Model):
         ("termine", "Terminé"),
         ("annule", "Annulé"),
     ]
-
     Datetime = models.DateTimeField()
     duree = models.TimeField()
     motif = models.TextField(blank=True, null=True)
