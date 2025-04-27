@@ -31,3 +31,4 @@ class DossierMedicalEnseignantAdmin(admin.ModelAdmin):
 @admin.register(DossierMedicalFonctionnaire)
 class DossierMedicalFonctionnaireAdmin(admin.ModelAdmin):
     inlines = [DocumentInline]
+admin.site.register(Depistage)
