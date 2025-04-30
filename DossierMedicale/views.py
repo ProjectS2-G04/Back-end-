@@ -18,6 +18,7 @@ from .models import *
 from .serializers import *
 from .utils.pdf_generator import generate_medical_pdf
 # views.py
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -61,7 +62,7 @@ class DossierMedicalEnseignantListView(generics.ListAPIView):
 
 class DossierMedicalFonctionnaireListView(generics.ListAPIView):
     queryset = DossierMedicalFonctionnaire.objects.filter(is_archived=False)
-    serializer_class = DossierMedicaleSerializer
+    serializer_class = DossierMedicalAtsSerializer
 
 class DossierMedicalSearchView(ListAPIView):
     queryset = None
@@ -89,8 +90,11 @@ class DossierMedicalFonctionnaireSearchView(DossierMedicalSearchView):
 import logging
 logger = logging.getLogger(__name__)
 
+from rest_framework.parsers import MultiPartParser, FormParser
+
 class DossierMedicalEtudiantView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]  # Add parsers
 
     def get(self, request, pk=None):
         if pk:
@@ -158,6 +162,7 @@ class DossierMedicalEnseignantView(APIView):
 
 class DossierMedicalATSView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request, pk=None):
         if pk:
@@ -172,7 +177,7 @@ class DossierMedicalATSView(APIView):
         serializer = DossierMedicalAtsSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-            generate_medical_pdf(dossier, serializer.data, "ats", Document)
+            generate_medical_pdf(dossier, serializer.data, "fonctionnaires", Document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -181,7 +186,7 @@ class DossierMedicalATSView(APIView):
         serializer = DossierMedicalAtsSerializer(dossier, data=request.data, partial=True, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-            generate_medical_pdf(dossier, serializer.data, "ats", Document)
+            generate_medical_pdf(dossier, serializer.data, "fonctionnaires", Document)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
