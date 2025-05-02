@@ -35,12 +35,33 @@ def new_rdv_notification(sender, instance, created, **kwargs):
             )
 
     elif statut == "reserve":
+        # Notification pour le patient
         Notification.objects.create(
             user=patient,
             message=f"Un rendez-vous a été planifié pour vous le {rdv_date}.",
             is_read=False,
             rendez_vous=instance
         )
+
+        # Notification pour les médecins si créé par assistant
+        if instance.cree_par and instance.cree_par.role in ["ASSISTANT", "ASSISTANT_MEDECIN"]:
+            for medecin in User.objects.filter(role__in=["DOCTOR", "MEDECIN"]):
+                Notification.objects.create(
+                    user=medecin,
+                    message=f"Un rendez-vous a été planifié pour {patient.first_name} {patient.last_name}  le {rdv_date}.",
+                    is_read=False,
+                    rendez_vous=instance
+                )
+
+        # Notification pour les assistants si créé par médecin
+        elif instance.cree_par and instance.cree_par.role in ["DOCTOR", "MEDECIN"]:
+            for assistant in User.objects.filter(role__in=["ASSISTANT", "ASSISTANT_MEDECIN"]):
+                Notification.objects.create(
+                    user=assistant,
+                    message=f"Un rendez-vous a été planifié pour {patient.first_name} {patient.last_name} le {rdv_date}.",
+                    is_read=False,
+                    rendez_vous=instance
+                )
         
 @receiver(post_save, sender=RendezVous)
 def update_rdv_notification(sender, instance, created, **kwargs):
