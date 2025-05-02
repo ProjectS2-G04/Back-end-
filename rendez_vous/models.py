@@ -36,12 +36,28 @@ class RendezVous(models.Model):
         related_name="rendezvous_assistant",
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default="reserve")
-
+    statut = models.CharField(max_length=10, choices=STATUT_CHOICES)
+    
+    cree_par = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rdvs_crees",
+        help_text="Utilisateur qui a créé le rendez-vous",
+    )
+    modifie_par = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rdvs_modifies",
+        help_text="Utilisateur qui a modifié le rendez-vous (annulé, confirmé, reporté...)",
+    )
     def __str__(self):
-        return f"Rendez-vous le {self.Datetime} - Patient: {self.patient.email}"
+        return f"Rendez-vous pour {self.patient} avec Dr. {self.medecin} le {self.created_at.strftime('%d/%m/%Y à %H:%M')} "
 
-
+    
 class DemandeRendezVous(models.Model):
     STATUT_CHOICES = [
         ("en_attente", "En attente"),

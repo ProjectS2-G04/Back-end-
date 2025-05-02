@@ -48,6 +48,28 @@ class RendezVousCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ['patient', 'medecin', 'assistant', 'created_at', 'statut']
 
+class RendezVousMedAssCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RendezVous
+        fields = '__all__'
+        read_only_fields = [
+            'patient', 'medecin', 'assistant',
+            'created_at', 'cree_par', 'modifie_par', 'statut'
+        ]
+class RendezVousPatientCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RendezVous
+        fields = '__all__'
+        read_only_fields = [
+            'patient',
+            'medecin',
+            'assistant',
+            'cree_par',
+            'modifie_par',
+            'created_at',
+            'statut'
+        ]
+
 class PlageHoraireSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlageHoraire
