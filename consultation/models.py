@@ -1,6 +1,6 @@
 from django.db import models
 from rendez_vous.models import *
-
+from django.utils import timezone
 
 class Consultation(models.Model):
     STATUS_CHOICES = [
@@ -11,6 +11,10 @@ class Consultation(models.Model):
      ("Regulier" ,"Regulier "),
      ("Automatique" ,"Automatique"),
     ]
+    SEXE_CHOICES = [
+        ("Homme", "Homme"),
+        ("Femme", "Femme"),
+    ]
 
     rendezvous = models.OneToOneField(
         "rendez_vous.RendezVous", verbose_name=("consultation"), on_delete=models.CASCADE
@@ -19,6 +23,12 @@ class Consultation(models.Model):
     taille = models.FloatField(verbose_name=("Taille"), null=True, blank=True)
     tensionArterielle = models.FloatField(
         verbose_name=("Tension artérielle"), null=True, blank=True
+    )
+    date = models.DateField(default=timezone.now)
+    sexe = models.CharField(
+        max_length=10,
+        choices=SEXE_CHOICES,
+        default="Homme",
     )
     temperature = models.FloatField(verbose_name=("Température"), null=True, blank=True)
     frequenceCardiaque = models.FloatField(
@@ -50,6 +60,7 @@ class MaladieCronique(models.Model):
         Consultation, verbose_name=("Consultation"), on_delete=models.CASCADE
     )
     nom = models.CharField(max_length=100, verbose_name=("Nom de la maladie"))
+    sub_nom =models.CharField(max_length=100, default="Diabète")
 
     def __str__(self):
         return self.nom
