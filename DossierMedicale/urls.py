@@ -97,6 +97,11 @@ urlpatterns = [
         DossierMedicalEtudiantView.as_view(),
         name="dossiers-etudiants-list",
     ),
+    path(
+        "dossiers/enseignants/<int:pk>/",
+        DossierMedicalEnseignantView.as_view(),
+        name="dossiers-enseignants-detail",
+    ),
    path('dossiers/enseignants/', DossierMedicalEnseignantListView.as_view(), name='enseignants-list'),
 # urls.py
 path("dossiers/enseignants/create/", DossierMedicalEnseignantView.as_view(), name="dossiers-enseignants-create"),  
