@@ -15,8 +15,6 @@ def save_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 
-
-
 """"class UserProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source='user.first_name', required=False)
     last_name = serializers.CharField(source='user.last_name', required=False)

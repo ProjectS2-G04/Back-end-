@@ -18,6 +18,7 @@ from .models import *
 from .serializers import *
 from .utils.pdf_generator import generate_medical_pdf
 # views.py
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -61,7 +62,7 @@ class DossierMedicalEnseignantListView(generics.ListAPIView):
 
 class DossierMedicalFonctionnaireListView(generics.ListAPIView):
     queryset = DossierMedicalFonctionnaire.objects.filter(is_archived=False)
-    serializer_class = DossierMedicaleSerializer
+    serializer_class = DossierMedicalAtsSerializer
 
 class DossierMedicalSearchView(ListAPIView):
     queryset = None
@@ -89,8 +90,11 @@ class DossierMedicalFonctionnaireSearchView(DossierMedicalSearchView):
 import logging
 logger = logging.getLogger(__name__)
 
+from rest_framework.parsers import MultiPartParser, FormParser
+
 class DossierMedicalEtudiantView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]  # Add parsers
 
     def get(self, request, pk=None):
         if pk:
@@ -122,42 +126,64 @@ class DossierMedicalEtudiantView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
 logger = logging.getLogger(__name__)
 
 class DossierMedicalEnseignantView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request, pk=None):
+        try:
+            if pk:
+                dossier = get_object_or_404(DossierMedicalEnseignant, pk=pk)
+                serializer = DossierMedicalEnseignantSerializer(dossier, context={"request": request})
+                logger.info(f"Retrieved dossier ID {pk} for user: {request.user.email}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                dossiers = DossierMedicalEnseignant.objects.filter(is_archived=False)
+                serializer = DossierMedicalEnseignantSerializer(dossiers, many=True, context={"request": request})
+                logger.info(f"Retrieved {len(dossiers)} dossiers for user: {request.user.email}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error retrieving dossier(s) for user {request.user.email}: {str(e)}", exc_info=True)
+            return Response({"error": f"Internal server error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
-        logger.info(f"POST request received for DossierMedicalEnseignantView: {request.data}")
-        serializer = DossierMedicalEnseignantSerializer(data=request.data, context={"request": request})
-        if serializer.is_valid():
-            dossier = serializer.save()
-            logger.info(f"Dossier created: ID {dossier.id}")
-            generate_medical_pdf(dossier, serializer.data, "enseignant", Document)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        logger.error(f"Serializer errors: {serializer.errors}")
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = DossierMedicalEnseignantSerializer(data=request.data, context={"request": request})
-        if serializer.is_valid():
-            dossier = serializer.save()
-            generate_medical_pdf(dossier, serializer.data, "enseignant", Document)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            logger.info(f"POST request received for DossierMedicalEnseignantView: {request.data}")
+            serializer = DossierMedicalEnseignantSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                dossier = serializer.save()
+                generate_medical_pdf(dossier, serializer.data, "enseignant", Document)
+                logger.info(f"Dossier created: ID {dossier.id} for user: {request.user.email}")
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            logger.error(f"Serializer errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error creating dossier for user {request.user.email}: {str(e)}", exc_info=True)
+            return Response({"error": f"Internal server error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def put(self, request, pk):
-        dossier = get_object_or_404(DossierMedicalEnseignant, pk=pk)
-        serializer = DossierMedicalEnseignantSerializer(dossier, data=request.data, partial=True, context={"request": request})
-        if serializer.is_valid():
-            dossier = serializer.save()
-            generate_medical_pdf(dossier, serializer.data, "enseignant", Document)
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            dossier = get_object_or_404(DossierMedicalEnseignant, pk=pk)
+            logger.info(f"PUT request received for dossier ID {pk} by user: {request.user.email}")
+            serializer = DossierMedicalEnseignantSerializer(dossier, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                dossier = serializer.save()
+                generate_medical_pdf(dossier, serializer.data, "enseignant", Document)
+                logger.info(f"Dossier updated: ID {dossier.id}")
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            logger.error(f"Serializer errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error updating dossier ID {pk} for user {request.user.email}: {str(e)}", exc_info=True)
+            return Response({"error": f"Internal server error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DossierMedicalATSView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request, pk=None):
         if pk:
@@ -172,7 +198,7 @@ class DossierMedicalATSView(APIView):
         serializer = DossierMedicalAtsSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-            generate_medical_pdf(dossier, serializer.data, "ats", Document)
+            generate_medical_pdf(dossier, serializer.data, "fonctionnaires", Document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -181,7 +207,7 @@ class DossierMedicalATSView(APIView):
         serializer = DossierMedicalAtsSerializer(dossier, data=request.data, partial=True, context={"request": request})
         if serializer.is_valid():
             dossier = serializer.save()
-            generate_medical_pdf(dossier, serializer.data, "ats", Document)
+            generate_medical_pdf(dossier, serializer.data, "fonctionnaires", Document)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

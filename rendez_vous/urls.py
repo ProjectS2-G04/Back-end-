@@ -9,9 +9,14 @@ urlpatterns = [
     path("list/<int:id>/", OrdonnanceDetailView.as_view(), name="ordonnance"),
     path("my_ordonnances/", PatientOrdonnanceListView.as_view(), name="my_ordonnances"),
     path(
-        "createrenderVous/<int:patient_id>/",
-        CreateRendezVousView.as_view(),
-        name="create-rendezvous",
+        "createrenderVousMedAss/<int:patient_id>/",
+        CreateRendezVousParMedAssView.as_view(),
+        name="create-rendezvous_MedAss",
+    ),
+    path(
+        "createrenderVousPatient/",
+        CreateRendezVousParPatientView.as_view(),
+        name="create-rendezvous_patient",
     ),
     path("demandes/rdv/", demandes_rendez_vous, name="demandes_rdv"),
     path("demandes/annulation/", demandes_annulation, name="demandes_annulation"),

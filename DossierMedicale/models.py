@@ -176,7 +176,7 @@ class DossierMedicalFonctionnaire(DossierMedical):
 
 
 class Depistage (models.Model):
-    doosier = models.OneToOneField(DossierMedical , on_delete= models.CASCADE )
+    doosier = models.OneToOneField(DossierMedical , on_delete= models.CASCADE)
     evaluation_auditive = models.CharField(max_length=50, choices=[
         ('normal', 'Normal'),
         ('perte_auditive', 'Perte auditive'),
