@@ -11,7 +11,6 @@ class Consultation(models.Model):
      ("Regulier" ,"Regulier "),
      ("Automatique" ,"Automatique"),
     ]
-
     rendezvous = models.OneToOneField(
         "rendez_vous.RendezVous", verbose_name=("consultation"), on_delete=models.CASCADE
     )

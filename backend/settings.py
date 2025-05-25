@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "consultation",
     "django_extensions",
     "rest_framework_simplejwt",
+    'statistics_app',
 ]
 
 MIDDLEWARE = [

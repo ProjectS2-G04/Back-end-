@@ -38,6 +38,11 @@ class User(AbstractUser):
         ("ATS", "ATS"),
         ("TEACHER", "Enseignant"),
     )
+    GENDER_CHOICES = [
+        ('Male', 'Homme'),
+        ('Female', 'Femme'),
+    ]
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Sexe")
 
     role = models.CharField(max_length=10, choices=ROLES)
     sub_role = models.CharField(max_length=10, choices=SUB_ROLES, null=True, blank=True)
