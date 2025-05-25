@@ -10,6 +10,36 @@ from .models import (
     validate_phone_number,
 )
 
+# serializers.py
+from rest_framework import serializers
+from .models import DossierMedicalFonctionnaire, Depistage, Document
+
+class DepistageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Depistage
+        fields = [
+            'evaluation_auditive',
+            'utilisation_audiometre',
+            'test_reponse_son',
+            'remarque_audition',
+            'vision_lointaine',
+            'vision_proche',
+            'besoin_lunettes',
+            'test_snellen_effectue',
+            'remarque_vision',
+            'pression_oculaire',
+            'examen_fond_oeil',
+            'tests_ophtalmo_suppl',
+            'maladies_oculaires_detectees',
+            'examen_nez',
+            'examen_oreille',
+            'examen_larynx',
+            'remarque_orl',
+        ]
+
+
+
+
 
 class DossierMedicaleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,8 +112,9 @@ class DossierMedicalEnseignantSerializer(DossierMedicalSerializer):
         }
 
 
-class DossierMedicalAtsSerializer(DossierMedicalSerializer):
+class DossierMedicalAtsSerializer(serializers.ModelSerializer):
     dossier_documents = DocumentSerializer(many=True, read_only=True)
+    depistage = DepistageSerializer(read_only=True, allow_null=True)  # Allow null
 
     class Meta:
         model = DossierMedicalFonctionnaire

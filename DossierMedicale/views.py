@@ -430,14 +430,40 @@ class GetUserDossierView(APIView):
     def get(self, request):
         try:
             user = request.user
-            logger.info(f"Fetching dossier for user: {user.email} (ID: {user.id})")
-            dossier = DossierMedicalEtudiant.objects.get(user=user)
-            serializer = DossierMedicalEtudiantSerializer(dossier, context={'request': request})
-            logger.info(f"Dossier found: ID {dossier.id}")
+            logger.info(f"Fetching dossier for user: {user.email} (ID: {user.id}, sub_role: {user.sub_role})")
+            
+            # Determine the correct model and serializer based on sub_role
+            model, serializer_class = get_dossier_model(user)
+            if not model:
+                logger.warning(f"No dossier model found for user: {user.email}, sub_role: {user.sub_role}")
+                return Response(
+                    {"error": "No dossier model matches your user role."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Fetch the dossier for the authenticated user
+            dossier = model.objects.filter(user=user).first()
+            if not dossier:
+                logger.warning(f"No dossier found for user: {user.email}, sub_role: {user.sub_role}")
+                return Response(
+                    {"error": "Dossier not found for this user."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            if dossier.is_archived:
+                logger.warning(f"Dossier is archived for user: {user.email}, ID: {dossier.id}")
+                return Response(
+                    {"error": "Votre dossier médical a été archivé."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            serializer = serializer_class(dossier, context={'request': request})
+            logger.info(f"Dossier found: ID {dossier.id} for user: {user.email}")
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except DossierMedicalEtudiant.DoesNotExist:
-            logger.warning(f"No dossier found for user: {user.email}")
-            return Response({"error": "Dossier not found for this user."}, status=status.HTTP_404_NOT_FOUND)
+        
         except Exception as e:
             logger.error(f"Error fetching dossier for user {user.email}: {str(e)}", exc_info=True)
-            return Response({"error": f"Internal server error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": f"Internal server error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

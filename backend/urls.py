@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/rendez-vous/", include("rendez_vous.urls")),
     path("api/consultation/", include("consultation.urls")),
     path("api/notifications/", include("notifications.urls")),
+    path('statistics/', include('statistics_app.urls')),
 ]
 
 if settings.DEBUG:

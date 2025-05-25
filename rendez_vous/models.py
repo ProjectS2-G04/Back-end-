@@ -12,6 +12,11 @@ class RendezVous(models.Model):
         ("termine", "Terminé"),
         ("annule", "Annulé"),
     ]
+    GENDER_CHOICES = [
+        ('Male', 'Homme'),
+        ('Female', 'Femme'),
+    ]
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Sexe")
     Datetime = models.DateTimeField()
     duree = models.TimeField()
     motif = models.TextField(blank=True, null=True)
