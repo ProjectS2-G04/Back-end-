@@ -12,6 +12,19 @@ class MedicamentSerializer(serializers.ModelSerializer):
         model = Medicament
         fields = ['nom', 'posologie', 'duree']
 
+class OrdonnanceSerializer(serializers.ModelSerializer):
+    medicaments = MedicamentSerializer(many=True)
+
+    class Meta:
+        model = Ordonnance
+        fields = ['age', 'date', 'medicaments']
+    def create(self, validated_data):
+        medicaments_data = validated_data.pop('medicaments')
+        ordonnance = Ordonnance.objects.create(**validated_data)
+        for medicament_data in medicaments_data:
+            Medicament.objects.create(ordonnance=ordonnance, **medicament_data)
+        return ordonnance    
+
 class OrdonnanceDetailSerializer(serializers.ModelSerializer):
     patient_prenom = serializers.CharField(source='patient.first_name')
     patient_nom = serializers.CharField(source='patient.last_name')
@@ -19,7 +32,20 @@ class OrdonnanceDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ordonnance
-        fields = ['id', 'age', 'date', 'patient_prenom', 'patient_nom', 'medicaments'] 
+        fields = ['id', 'age', 'date', 'patient_prenom', 'patient_nom', 'medicaments']         
+
+    def create(self, validated_data):
+        medicaments_data = validated_data.pop('medicaments')
+        ordonnance = Ordonnance.objects.create(**validated_data)
+        for medicament_data in medicaments_data:
+            Medicament.objects.create(ordonnance=ordonnance, **medicament_data)
+        return ordonnance
+
+
+
+
+
+
 
 class RendezVousSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,8 +62,6 @@ class DemandeRendezVousSerializer(serializers.ModelSerializer):
         model = DemandeRendezVous
         fields = '__all__'
         read_only_fields = ['statut', 'patient', 'created_at']
-        fields = "__all__"
-        read_only_fields = ["statut", "patient", "created_at"]
 
 class RendezVousCreateSerializer(serializers.ModelSerializer):
     patient_id = serializers.IntegerField(source='patient.id', read_only=True)

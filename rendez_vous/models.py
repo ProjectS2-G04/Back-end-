@@ -2,7 +2,7 @@ from datetime import timezone
 from django.db import models
 from django.core.exceptions import ValidationError
 from accounts.models import User
-
+from consultation.models import Consultation
 
 class RendezVous(models.Model):
     STATUT_CHOICES = [
@@ -119,6 +119,12 @@ class PlageHoraire(models.Model):
 
 
 class Ordonnance(models.Model):
+    consultation = models.OneToOneField(
+        Consultation, 
+        on_delete=models.CASCADE,
+        related_name="ordonnance",
+        null=True , blank=True
+    )
     patient = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

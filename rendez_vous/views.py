@@ -11,10 +11,31 @@ from .serializers import *
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import RetrieveAPIView
 
+class OrdonnanceDetailByConsultationView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, consultation_id):
+        try:
+            consultation = Consultation.objects.get(id=consultation_id)
+        except Consultation.DoesNotExist:
+            return Response({"error": "Consultation introuvable"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            ordonnance = Ordonnance.objects.get(consultation=consultation)
+        except Ordonnance.DoesNotExist:
+            return Response({"message": "Aucune ordonnance n'est associée à cette consultation."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = OrdonnanceDetailSerializer(ordonnance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+
 class OrdonnanceDetailView(RetrieveAPIView):
     queryset = Ordonnance.objects.all()
     serializer_class = OrdonnanceDetailSerializer
-    permission_classes = [IsAuthenticatedMedecin]
+    #permission_classes = [IsAuthenticated]
     lookup_field = 'id'
 
 class PatientOrdonnanceListView(ListAPIView):
@@ -27,32 +48,33 @@ class PatientOrdonnanceListView(ListAPIView):
 class OrdonnanceCreateView(APIView):
     permission_classes = [IsAuthenticatedMedecin]
 
-    def post(self, request, pk ):
-        
-        age = request.data.get("age")
+    def post(self, request, pk):
         try:
-            patient = User.objects.get(id=pk)
-        except User.DoesNotExist:
-            return Response({"error": "Patient not found."}, status=404)
+            consultation = Consultation.objects.get(id=pk)
+        except Consultation.DoesNotExist:
+            return Response({"error": "Consultation not found."}, status=404)
+        
+        if Ordonnance.objects.filter(consultation=consultation).exists():
+            return Response({"message": "Cette consultation a déjà une ordonnance."}, status=400) 
+        patient = consultation.rendezvous.patient
+        medecin = request.user
+        
+        data = request.data.copy()
+      
 
-        ordonnance = Ordonnance.objects.create(
-            patient=patient,
-            medecin=request.user, 
-            age=age,
-            date=today_date
-        )
-
-        # Now create the medicaments
-        medicaments_data = request.data.get("medicaments", [])
-        for medicament in medicaments_data:
-            Medicament.objects.create(
-                nom=medicament["nom"],
-                posologie=medicament["posologie"],
-                duree=medicament["duree"],
-                ordonnance=ordonnance
+        serializer = OrdonnanceSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(
+                patient=patient,
+                medecin=medecin,
+                consultation=consultation
             )
+            return Response({
+                "message": "Ordonnance created successfully.",
+                "ordonnance_id": serializer.instance.id
+            }, status=201)
 
-        return Response({"message": "Ordonnance created successfully.", "ordonnance_id": ordonnance.id}, status=201)
+        return Response(serializer.errors, status=400)
 
 class OrdonnanceListView(ListAPIView):
     queryset = Ordonnance.objects.all()

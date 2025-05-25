@@ -43,7 +43,7 @@ class Consultation(models.Model):
     )
 
     def __str__(self):
-        return f"Consultation - {self.rendezvous}"
+        return f"Consultation - {self.date}"
     
 class MaladieContagieuse(models.Model):
 
