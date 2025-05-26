@@ -1,5 +1,4 @@
 # users/views.py
-from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,7 +12,7 @@ from django.contrib.auth.tokens import default_token_generator
 from .models import Profile
 from .serializers import GroupSerializer, MembersSerializer, RegisterAdminSerializer, UserProfileSerializer
 from accounts.models import User
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView ,UpdateAPIView
 
 class RegisterAdminView(generics.CreateAPIView):
     serializer_class = RegisterAdminSerializer
@@ -99,7 +98,7 @@ class ListPatientAPIView(ListGroupAPIView):
     group_name = "Patient"
     permission_classes = []
 
-class UpdateUserProfileView(RetrieveAPIView):
+class UserProfileView(RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
@@ -107,3 +106,13 @@ class UpdateUserProfileView(RetrieveAPIView):
         user = self.request.user
         profile, created = Profile.objects.get_or_create(user=user)
         return profile
+    
+
+class UpdateUserProfileView(UpdateAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        profile, created = Profile.objects.get_or_create(user=user)
+        return profile    

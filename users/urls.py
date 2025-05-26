@@ -6,7 +6,8 @@ from .views import GroupMembersAPIView
 
 
 urlpatterns = [
-   path('profile/' ,UpdateUserProfileView.as_view() , name="edit_profile"),
+   path('profile/' ,UserProfileView.as_view() , name="profile"),
+   path('profile/update/' ,UpdateUserProfileView.as_view() , name="edit_profile"),
    path('groups/', GroupMembersAPIView.as_view(), name='group-list'),
    path('groups/admin/', ListAdminAPIView.as_view(), name='list-admin'),
    path('groups/medecin/', ListMedecinAPIView.as_view(), name='list-medecin'),

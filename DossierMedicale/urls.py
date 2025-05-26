@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-
+from .views import *
 from .views import (
     ActivateUserView,
     ArchiveDossierMedicalView,
@@ -30,7 +30,19 @@ router = DefaultRouter()
 router.register(r"documents", DocumentViewSet)
 
 urlpatterns = [
-    # Search endpoints
+    path('search-enseignant/', DossierMedicalEnseignantSearchView.as_view(), name='search-enseignant'),
+path('search-etudiant/', DossierMedicalEtudiantSearchView.as_view(), name='search-enseignant'),
+path('search-fonctionnaire/', DossierMedicalFonctionnaireSearchView.as_view(), name='search-enseignant'),
+path("etudiants/", MedicalEtudianListView.as_view(), name="etudiants-list"),
+path("enseignants/", MedicalEnseignantListView.as_view(), name="enseignants-list"),
+path("fonctionnaires/",MedicalFonctionnaireListView.as_view(), name="fonctionnaires-list"),
+path("archive/<int:pk>/", ArchiveDossierMedicalView.as_view(), name="archive-dossier"),
+path("toggle-activation/<int:pk>/", ToggleUserActivationView.as_view(), name="activate-user"),
+
+
+
+
+
     path(
         "dossiers/search/etudiant/",
         DossierMedicalEtudiantSearchView.as_view(),

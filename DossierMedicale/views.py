@@ -27,6 +27,7 @@ from .models import DossierMedicalEtudiant, DossierMedicalEnseignant, DossierMed
 from .serializers import DossierMedicalEtudiantSerializer, DossierMedicalEnseignantSerializer, DossierMedicalAtsSerializer
 import logging
 
+
 class ActivateUserView(APIView):
     def post(self, request, pk):
         user = get_object_or_404(User, pk=pk)
@@ -44,6 +45,18 @@ class DesactivateUserView(APIView):
         user.is_active = False
         user.save()
         return Response({"message": "User deactivated successfully."}, status=status.HTTP_200_OK)
+
+class ToggleUserActivationView(APIView):
+    def post(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        user.is_active = not user.is_active
+        user.save()
+        
+        status_msg = "activated" if user.is_active else "deactivated"
+        return Response(
+            {"message": f"User {status_msg} successfully."},
+            status=status.HTTP_200_OK
+        )
 
 class ArchiveDossierMedicalView(APIView):
     def post(self, request, pk):
@@ -63,6 +76,25 @@ class DossierMedicalEnseignantListView(generics.ListAPIView):
 class DossierMedicalFonctionnaireListView(generics.ListAPIView):
     queryset = DossierMedicalFonctionnaire.objects.filter(is_archived=False)
     serializer_class = DossierMedicalAtsSerializer
+
+
+class MedicalEtudianListView(generics.ListAPIView):
+    queryset = DossierMedicalEtudiant.objects.filter(is_archived=False)
+    serializer_class = DossierMedicaleSerializer
+
+class MedicalEnseignantListView(generics.ListAPIView):
+    queryset = DossierMedicalEnseignant.objects.filter(is_archived=False)
+    serializer_class = DossierMedicaleSerializer
+
+class MedicalFonctionnaireListView(generics.ListAPIView):
+    queryset = DossierMedicalFonctionnaire.objects.filter(is_archived=False)
+    serializer_class = DossierMedicaleSerializer
+
+
+
+
+
+
 
 class DossierMedicalSearchView(ListAPIView):
     queryset = None

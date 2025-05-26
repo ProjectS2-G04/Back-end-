@@ -6,6 +6,14 @@ from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from .models import *
 from .serializers import *
+from django.shortcuts import get_object_or_404
+
+class MarkNotificationAsReadView(APIView):
+    def post(self, request, pk):
+        notification = get_object_or_404(Notification, pk=pk)
+        notification.is_read = True
+        notification.save()
+        return Response({"message": "Notification marquée comme lue."}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

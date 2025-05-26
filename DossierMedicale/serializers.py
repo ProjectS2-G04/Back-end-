@@ -10,7 +10,6 @@ from .models import (
     validate_phone_number,
 )
 
-# serializers.py
 from rest_framework import serializers
 from .models import DossierMedicalFonctionnaire, Depistage, Document
 
