@@ -12,13 +12,9 @@ class RendezVous(models.Model):
         ("termine", "Terminé"),
         ("annule", "Annulé"),
     ]
-    GENDER_CHOICES = [
-        ('Male', 'Homme'),
-        ('Female', 'Femme'),
-    ]
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Sexe")
+   
     Datetime = models.DateTimeField()
-    duree = models.TimeField()
+    duree = models.TimeField(blank=True, null=True)
     motif = models.TextField(blank=True, null=True)
     patient = models.ForeignKey(
         User,
@@ -154,7 +150,7 @@ class Ordonnance(models.Model):
 class Medicament(models.Model):
     nom = models.CharField(max_length=100)
     posologie = models.CharField(max_length=255)
-    duree = models.CharField(max_length=50)
+    # duree = models.CharField(max_length=50)
     ordonnance = models.ForeignKey(
         Ordonnance, on_delete=models.CASCADE, related_name="medicaments"
     )
