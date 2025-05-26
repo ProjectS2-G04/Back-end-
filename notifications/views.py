@@ -15,7 +15,15 @@ class MarkNotificationAsReadView(APIView):
         notification.save()
         return Response({"message": "Notification marquée comme lue."}, status=status.HTTP_200_OK)
     
-
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def supprimer_notification(request, id):
+    try:
+        notification = Notification.objects.get(id=id, user=request.user)
+        notification.delete()
+        return Response({"message": "Notification supprimée"}, status=status.HTTP_204_NO_CONTENT)
+    except Notification.DoesNotExist:
+        return Response({"error": "Notification non trouvée"}, status=status.HTTP_404_NOT_FOUND)
 
     
 

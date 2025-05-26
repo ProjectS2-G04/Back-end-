@@ -6,5 +6,6 @@ urlpatterns = [
     path('marquer-toutes-lues/', marquer_toutes_notifications_lues, name='marquer_toutes_notifications_lues'),
     path('nouveau-count/', NombreNotificationsNonLuesView.as_view(), name='notifications-nouveau-count'),
     path('notifications/marquer-toutes-lues/', marquer_toutes_notifications_lues, name='marquer_toutes_notifications_lues'),
-    path("marquer_comme_lu/<int:pk>/",MarkNotificationAsReadView.as_view(), name="notification" )
+    path("marquer_comme_lu/<int:pk>/",MarkNotificationAsReadView.as_view(), name="notification" ),
+    path('supprimer/<int:id>/' , supprimer_notification , name='supprimer_notification')
 ]
