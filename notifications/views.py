@@ -14,8 +14,12 @@ class MarkNotificationAsReadView(APIView):
         notification.is_read = True
         notification.save()
         return Response({"message": "Notification marquée comme lue."}, status=status.HTTP_200_OK)
+    
 
-@api_view(['GET'])
+
+    
+
+@api_view(['GET'])   
 @permission_classes([IsAuthenticated])
 def mes_notifications(request):
     notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
